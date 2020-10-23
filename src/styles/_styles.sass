@@ -1,0 +1,190 @@
+@import url('https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@900&family=MedievalSharp&family=Roboto&display=swap');
+
+$gray: #9D8F9A
+$purple: #8F6690
+$blue: #413482
+$pink: #EC4C70
+$lightgray: #BFBBB6
+
+$shadow: 3px 3px $blue
+$radius: 2px
+
+html,
+body
+  margin: 0
+  padding: 0
+  height: 100%
+
+body
+  background: $gray url('../assets/dungeon.jpg') center center no-repeat
+  background-size: cover
+  font-family: 'Roboto', sans-serif
+
+.container
+  width: 1200px
+  position: relative
+  margin: 0 auto
+
+h1, h2, h3
+  margin: 0
+
+h1
+  padding-top: 3rem
+  font-family: 'MedievalSharp', cursive
+  font-size: 62px
+  text-shadow: $shadow
+  text-align: center
+  color: #fff
+  margin: 0 0 3rem
+
+h2
+  margin: 0 0 2rem
+  padding-top: 2rem
+  font-family: 'Grenze Gotisch', cursive
+  font-size: 44px
+  text-shadow: $shadow
+  color: $lightgray
+  text-align: center
+  text-transform: uppercase
+
+.Players
+  display: flex
+  justify-content: space-between
+  flex-wrap: wrap
+
+.Player
+  width: 260px
+  border-radius: 4%
+  border: 8px solid $blue
+  text-align: center
+  background: $lightgray
+  padding: 10px
+  margin-bottom: 4%
+  position: relative
+
+  &:nth-child(4n)
+    margin-right: 0
+
+  &:hover
+    
+    .Amulet,
+    .Shield
+      border: 1px dotted $gray
+
+  &.dead
+
+    &:after
+      content: ''
+      pointer-events: none
+      position: absolute
+      top: 0
+      left: 0
+      right: 0
+      bottom: 0
+      background: rgba(100, 100, 100, 0.5)
+      z-index: 1
+
+  h3
+    font-size: 26px
+    font-family: 'MedievalSharp'
+    letter-spacing: 2px
+    text-shadow: 1px 1px $blue
+
+  img
+    width: 64px
+    height: auto
+    display: block
+    margin: 0 auto 20px
+
+  .Health,
+  .Potions
+    text-align: center
+    height: 32px
+    position: relative
+
+    img
+      display: inline-block
+      font-size: 0
+      width: 32px
+      height: 32px
+      margin: 0 1px
+      cursor: pointer
+
+    .bp3-icon
+      display: none
+      position: absolute
+      right: 3px
+      top: -3px
+      color: red
+      cursor: pointer
+
+    &:hover
+      .bp3-icon
+        display: inline-block
+
+  .Potions
+
+    .bp3-icon
+      color: $blue
+
+  .Amulet,
+  .Shield
+    position: absolute
+    top: 40px
+    width: 32px
+    height: 32px
+    cursor: pointer
+    border: 1px solid transparent
+    border-radius: 4px
+
+    img
+      width: 32px
+      height: 32px
+
+  .Amulet
+    left: 40px
+
+    img
+      transform: scaleX(-1)
+
+  .Shield
+    right: 40px
+    top: 36px
+
+.Play
+
+  .Player
+    margin: 20px auto
+
+.Event,
+.Monster
+  background: $lightgray
+  width: 300px
+  border: 8px solid #fff
+  border-radius: 10px
+  padding: 30px 20px
+
+  &.clickme
+    border: 8px solid $pink
+    transform: rotate(2deg)
+
+  h3
+    text-align: center
+    font-size: 23px
+    margin: 0 0 20px
+
+  p
+    font-size: 18px
+    margin: 0 0 20px
+    line-height: 1.4
+    padding: 15px
+    background: $gray
+    min-height: 170px
+
+  img
+    width: 96px
+    display: block
+    margin: 0 auto
+
+.Monster
+  border: 8px solid $pink
