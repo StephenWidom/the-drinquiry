@@ -17,6 +17,7 @@ const Health = props => {
             iconSize={32}
             onClick={() => socket.emit('updateHealth', player.id, 1)}
         />}
+        {!player.health && <h3>PEACHED</h3>}
     </div>;
 };
 

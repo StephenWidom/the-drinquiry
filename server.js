@@ -28,10 +28,16 @@ const game = {
     host: null,
     started: false,
     active: null,
+    battleTurn: null,
+    battle: false,
     event: null,
     monster: null,
     modifier: 0,
     health: null,
+    prompt: null,
+    rhymes: _.shuffle(require('./src/rhymes')),
+    categories:  _.shuffle(require('./src/categories')),
+    challenge: null,
 };
 
 io.on('connection', socket => {
@@ -86,17 +92,17 @@ io.on('connection', socket => {
     });
 
     socket.on('startGame', () => {
-        const { players } = game;
-        _.shuffle(players);
-        players[0].active = true;
+        const shuffledPlayers = _.shuffle(game.players);
+        game.players = shuffledPlayers;
+        game.active = shuffledPlayers[0].id;
+        game.players[0].active = true;
 
-        io.emit('updatePlayers', players);
+        io.emit('updatePlayers', game.players);
+        io.emit('updateActivePlayer', game.active);
         io.emit('gameStarted');
     });
 
     socket.on('updateHealth', (id, modifier) => {
-        console.log('updatingHealth');
-        console.log(id);
         const { players } = game;
         const thisPlayer = players.find(p => p.id === id);
         if (!_.isNil(thisPlayer)) {
@@ -123,26 +129,128 @@ io.on('connection', socket => {
         }
     });
 
-    socket.on('updateItem', (id, item) => {
+    socket.on('updateItem', (id, item, toggle = false) => {
         const { players } = game;
         const thisPlayer = players.find(p => p.id === id);
         if (!_.isNil(thisPlayer)) {
-            thisPlayer[item] = !thisPlayer[item];
+            thisPlayer[item] = (toggle) ? !thisPlayer[item] : true;
             io.emit('updatePlayers', players);
-            console.log('updated', item);
         }
     });
 
     socket.on('drawEvent', id => {
-        _.shuffle(events);
-        game.event = events[0];
+        const randInt = _.random(events.length - 1);
+        game.event = events[randInt];
         io.emit('updateEvent', game.event);
     });
 
     socket.on('drawMonster', id => {
-        _.shuffle(monsters);
-        game.monster = monsters[0];
+        const randInt = _.random(monsters.length - 1);
+        game.monster = monsters[randInt];
         io.emit('updateMonster', game.monster);
+    });
+
+    socket.on('initMonster', monster => {
+        console.log('initMonster');
+        game.health = monster.health + game.modifier;
+        io.emit('updateMonsterHealth', game.health);
+
+        game.challenge = (monster.challenge === 'random') ? _.sample(['category', 'rhyme', 'sentence']) : monster.challenge;
+        switch(game.challenge) {
+            case 'category':
+                game.prompt = game.categories.pop();
+                break;
+            case 'rhyme':
+                game.prompt = game.rhymes.pop();
+                break;
+            default: // Sentence
+                game.prompt = null;
+        }
+
+        io.emit('updatePrompt', game.prompt, game.challenge);
+
+    });
+
+    socket.on('updateModifier', modifier => {
+        game.modifier = modifier;
+    });
+
+    socket.on('battleMonster', challenge => {
+        game.battle = true;
+        game.battleTurn = game.active;
+        io.emit('updateBattle', true, game.battleTurn);
+        
+    });
+
+    socket.on('hitMonster', () => {
+        game.health--;
+        if (game.health < 0)
+            game.health = 0;
+
+        io.emit('updateMonsterHealth', game.health);
+        const nextToGo = nextPlayer(game.battleTurn, game.players); 
+        game.battleTurn = nextToGo.id;
+        io.emit('updateBattle', true, game.battleTurn);
+    });
+
+    socket.on('skipAttack', () => {
+        const { players } = game;
+        const thisPlayer =  players.find(p => p.id === game.active);
+        if (!_.isNil(thisPlayer)) {
+            thisPlayer.potions--;
+            io.emit('updatePlayers', players);
+        }
+        const nextToGo = nextPlayer(game.battleTurn, game.players); 
+        game.battleTurn = nextToGo.id;
+        io.emit('updateBattle', true, game.battleTurn);
+    });
+
+    socket.on('takeDamage', () => {
+        const { players, battleTurn, health } = game;
+        const thisPlayer = players.find(p => p.id === battleTurn);
+        if (!_.isNil(thisPlayer)) {
+            if (!thisPlayer.shield || health > 2) {
+                thisPlayer.health--;
+                if (!thisPlayer.health)
+                    thisPlayer.dead = true;
+
+                io.emit('updatePlayers', players);
+            }
+        }
+        game.health = null;
+        game.event = null;
+        game.monster = null;
+        game.active = nextPlayerId(game.active, players);
+        game.battleTurn = null;
+        game.battle = false;
+        game.modifier = 0;
+        game.prompt = null;
+        game.challenge = null;
+
+        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null);
+    });
+
+    socket.on('defeatMonster', () => {
+        game.health = null;
+        game.event = null;
+        game.monster = null;
+        game.active = nextPlayerId(game.active, game.players);
+        game.battleTurn = null;
+        game.battle = false;
+        game.modifier = 0;
+        game.prompt = null;
+        game.challenge = null;
+
+        // Slight delay to peep the reward
+        setTimeout(() => {
+            io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null);
+        }, 3500);
+    });
+
+    socket.on('shufflePlayers', () => {
+        const shuffledPlayers = _.shuffle(game.players);
+        game.players = shuffledPlayers;
+        io.emit('updatePlayers', game.players);
     });
 
     socket.on('disconnect', () => {
@@ -154,6 +262,9 @@ io.on('connection', socket => {
             game.players = [];
             game.started = false;
             game.active = null;
+            game.prompt = null;
+            game.rhymes = _.shuffle(require('./src/rhymes'));
+            game.categories = _.shuffle(require('./src/categories'));
         } else {
             return;
         }
@@ -165,3 +276,19 @@ server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
+const nextPlayer = (id, players) => {
+    const playerIndex = players.findIndex(p => p.id === id);
+    if (playerIndex === -1)
+        return false;
+
+    let actualIndex = playerIndex + 1;
+    if (actualIndex >= players.length)
+        actualIndex = 0;
+
+    return players[actualIndex];
+}
+
+const nextPlayerId = (id, players) => {
+    const nextJawn = nextPlayer(id, players);
+    return nextJawn.id;
+};

@@ -5,10 +5,12 @@ import Potions from './Potions';
 import Amulet from './Amulet';
 import Shield from './Shield';
 
+import { isBattling, isActive } from '../utils';
+
 const Player = props => {
-    const { player, socket } = props;
-    return <div className={`Player ${player.dead ? 'dead' : ''}`}>
-        <img src={require(`../assets/${player.character}.png`)} alt='' />
+    const { player, socket, battleTurn, active } = props;
+    return <div className={`Player ${player.dead ? 'dead' : ''} ${isActive(active, player) ? 'active' : ''} ${isBattling(battleTurn, player) ? 'battling' : 'nah'}`}>
+        <img className='avatar' src={require(`../assets/${player.character}.png`)} alt='' />
         <h3>{player.name}</h3>
         <Health player={player} socket={socket} />
         <Potions player={player} socket={socket} />

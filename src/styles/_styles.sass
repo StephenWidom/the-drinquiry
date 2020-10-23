@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@900&family=MedievalSharp&family=Roboto&display=swap');
+@import "~@blueprintjs/core/lib/scss/variables";
 
 $gray: #9D8F9A
 $purple: #8F6690
@@ -52,8 +53,29 @@ h2
   justify-content: space-between
   flex-wrap: wrap
 
+  &.slim
+    width: 300px
+    align-content: flex-start
+
+    .Player:not(.active)
+      padding-top: 15px
+      border: 4px solid $purple
+      height: 105px
+
+      .avatar,
+      .Potions
+        display: none
+
+      .Amulet,
+      .Shield
+        top: 2px
+
+      &.battling
+        border: 8px solid $pink
+
 .Player
   width: 260px
+  height: 217px
   border-radius: 4%
   border: 8px solid $blue
   text-align: center
@@ -62,8 +84,8 @@ h2
   margin-bottom: 4%
   position: relative
 
-  &:nth-child(4n)
-    margin-right: 0
+  &.battling
+    border: 8px solid $pink
 
   &:hover
     
@@ -72,6 +94,7 @@ h2
       border: 1px dotted $gray
 
   &.dead
+    background: $gray
 
     &:after
       content: ''
@@ -86,7 +109,7 @@ h2
 
   h3
     font-size: 26px
-    font-family: 'MedievalSharp'
+    font-family: 'MedievalSharp', cursive
     letter-spacing: 2px
     text-shadow: 1px 1px $blue
 
@@ -94,7 +117,7 @@ h2
     width: 64px
     height: auto
     display: block
-    margin: 0 auto 20px
+    margin: 5px auto 15px
 
   .Health,
   .Potions
@@ -156,13 +179,52 @@ h2
   .Player
     margin: 20px auto
 
+.Game
+  display: flex
+  flex-wrap: wrap
+
+  h2
+    width: 100%
+
+  .CardContainer
+    width: 900px
+    float: right
+
 .Event,
-.Monster
+.Monster,
+.Prompt
   background: $lightgray
   width: 300px
   border: 8px solid #fff
   border-radius: 10px
   padding: 30px 20px
+  position: relative
+  height: 415px
+
+  &:before
+    z-index: -1
+    content: ''
+    position: absolute
+    top: -8px
+    left: -8px
+    right: -8px
+    bottom: -8px
+    transform: rotate(3deg)
+    border: 8px solid #fff
+    background: $lightgray
+    border-radius: 10px
+
+  transition: all 0.2s ease
+  cursor: pointer
+
+  &:hover
+    transform: scale(1.1) rotate(-1deg)
+
+    .placeholder
+      filter: grayscale(0%)
+
+    &:before
+      display: none
 
   &.clickme
     border: 8px solid $pink
@@ -170,21 +232,155 @@ h2
 
   h3
     text-align: center
-    font-size: 23px
+    font-size: 24px
+    text-shadow: 1px 1px $blue
     margin: 0 0 20px
+    font-family: 'MedievalSharp', cursive
+    text-transform: uppercase
+    line-height: 1.1
+    height: 32px
 
   p
     font-size: 18px
-    margin: 0 0 20px
+    text-shadow: 1px 1px 12px #fff
+    margin: 20px 0 0
     line-height: 1.4
     padding: 15px
     background: $gray
-    min-height: 170px
+    height: 170px
+    border-radius: 2px
+
+    strong
+      margin-right: 5px
 
   img
     width: 96px
     display: block
     margin: 0 auto
 
+  h6
+    margin: 0
+    text-align: center
+    text-transform: uppercase
+    font-size: 22px
+    font-family: 'MedievalSharp', cursive
+
+  .placeholder
+    transition: all 0.2s ease
+    filter: grayscale(80%)
+    width: 128px
+    margin: 40px auto 140px
+
 .Monster
-  border: 8px solid $pink
+
+  h4
+    font-size: 40px
+    font-family: 'Grenze Gotisch', cursive
+    height: 50px
+    text-align: center
+    margin: 0
+
+  h5
+    height: 35px
+    font-size: 32px
+    text-transform: uppercase
+    margin: 20px 0 0
+    text-align: center
+    color: $blue
+    letter-spacing: 3px
+    background: #fff
+    font-family: 'MedievalSharp', cursive
+
+  p
+    height: 55px
+
+.Prompt
+
+  .placeholder
+    margin-bottom: 70px
+  
+  h3:last-child
+    font-size: 35px
+    position: absolute
+    bottom: 10px
+    margin: 0
+    padding: 0 10px
+    height: auto
+    left: 0
+    right: 0
+
+.CardContainer
+  display: flex
+  padding: 2rem 0
+  justify-content: space-around
+
+.DrawButtons
+  
+  h2
+    height: 80px
+    margin: 0
+    padding-top: 1rem
+
+.BattleInterface
+  display: flex
+  flex-wrap: none
+  justify-content: center
+
+  &.inactive
+
+    &>div
+      cursor: auto
+      background: $gray
+
+      img
+        filter: grayscale(100%)
+
+    &>div:hover
+
+      img
+        transform: none
+
+  &>div
+    border: 8px solid $purple
+    cursor: pointer
+    padding: 10px
+
+    &:hover
+
+      img 
+        transform: scale(1.2)
+
+  img
+    width: 96px
+    transition: all 0.2s ease
+
+  .hit
+    background: $green3
+    border-top-left-radius: 8px
+    border-bottom-left-radius: 8px
+
+  .miss
+    border-left: none
+    background: $red2
+    border-top-right-radius: 8px
+    border-bottom-right-radius: 8px
+  
+  .skip
+    background: $blue
+    border-left: none
+
+.BattleMessage
+  height: 80px
+  position: relative
+  width: 100%
+
+  h1
+    position: absolute
+    pointer-events: none
+    left: 0
+    right: 0
+    top: -40px
+
+  .nice
+    color: $pink
+    font-family: 'Grenze Gotisch'

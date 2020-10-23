@@ -5,7 +5,11 @@ import Player from './Player';
 import DrawButtons from './DrawButtons';
 import Event from './Event';
 import Monster from './Monster';
-import { isInGame, getPlayer } from '../utils';
+import CardContainer from './CardContainer';
+import BattleMessage from './BattleMessage';
+import BattleInterface from './BattleInterface';
+import Prompt from './Prompt';
+import { isInGame, getPlayer, isActive } from '../utils';
 
 export default class Play extends Component {
     constructor(props) {
@@ -15,15 +19,34 @@ export default class Play extends Component {
     }
 
     render() {
-        const { socket, players, event, monster } = this.props;
+        const { socket, players, started, battle, active, prompt } = this.props;
         const me = getPlayer(socket.id, players);
         return <div className='Play'>
             {!isInGame(socket.id, players) && <Redirect to='/join' />}
             <div className='container'>
                 {me && <Player player={me} socket={socket} />}
-                {me && me.active && <DrawButtons player={me} socket={socket} />}
-                {event && <Event {...this.props} player={me} />}
-                {monster && <Monster {...this.props} player={me} />}
+                {me && isActive(active, me)
+                    ? <>
+                        {battle && <>
+                            <BattleMessage {...this.props} />
+                            <BattleInterface player={me} {...this.props} />
+                        </>}
+                        <DrawButtons player={me} socket={socket} {...this.props} />
+                        <CardContainer>
+                            {!battle && <Event {...this.props} player={me} />}
+                            <Monster {...this.props} player={me} />
+                            {battle && !!prompt && <Prompt {...this.props} />}
+                        </CardContainer>
+                    </>
+                    : battle
+                        ? <>
+                            <BattleMessage {...this.props} />
+                            <BattleInterface player={me} {...this.props} />
+                        </>
+                        : started
+                            ? <h2>Awaiting the battle...</h2>
+                            : <h2>Waiting for the game to begin</h2>
+                }
             </div>
         </div>;
     }

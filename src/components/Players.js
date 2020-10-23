@@ -4,9 +4,9 @@ import Player from './Player';
 
 const Players = props => {
     const { players, socket } = props;
-    return <div className='Players'>
+    return <div className={`Players ${props.slim ? 'slim' : ''}`}>
         {players.map(player =>
-            <Player key={player.id} player={player} socket={socket} />
+            <Player key={player.id} player={player} socket={socket} {...props} />
         )}
     </div>;
 };

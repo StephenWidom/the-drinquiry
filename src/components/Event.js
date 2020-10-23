@@ -1,24 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 
 const Event = props => {
     const { event, socket, player } = props;
-    const [done, setDone] = useState(false);
-
-    const doCard = () => {
-        // Host cannot click the bish
-        if (!player)
+    useEffect(() => {
+        if (!player || !event)
             return;
 
-        if (event.code && !done)
-            eval(event.code);
+        console.log('EVALING');
 
-        setDone(true);
+        if (event.code)
+            eval(event.code);
+    }, [event]);
+
+    const handleEventClick = () => {
+        if (!event)
+            socket.emit('drawEvent');
     }
 
-    return <div className={`Event ${done ? '' : 'clickme'}`} onClick={doCard}>
-        <h3>{event.name}</h3>
-        <p>{event.text}</p>
-        <img src={require(`../assets/${event.src}.png`)} alt='' />
+    return <div className='Event' onClick={handleEventClick}>
+        {event
+            ? <>
+                <h3>{event.name}</h3>
+                <img src={require(`../assets/${event.src}.png`)} alt='' />
+                <p>{event.text}</p>
+            </>
+            : <>
+                <img className='placeholder' src={require('../assets/polymorph_other.png')} alt='' />
+                <h6>Event</h6>
+            </>
+        }
     </div>;
 };
 

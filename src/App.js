@@ -16,11 +16,16 @@ class App extends PureComponent {
             host: false,
             joinError: null,
             players: [],
+            active: null,
+            battleTurn: null,
             started: false,
             event: null,
             monster: null,
             modifier: 0,
             health: null,
+            battle: false,
+            prompt: null,
+            challenge: null,
         };
         this.socket = socketIOClient(process.env.REACT_APP_ADDR);
     }
@@ -32,6 +37,8 @@ class App extends PureComponent {
 
         this.socket.on('updatePlayers', players => this.setState({ players }, () => console.log(this.state)));
 
+        this.socket.on('updateActivePlayer', id => this.setState({ active: id }));
+
         this.socket.on('gameStarted', () => this.setState({ started: true }));
 
         this.socket.on('goToLobby', () => this.props.history.push('/play'));
@@ -39,6 +46,14 @@ class App extends PureComponent {
         this.socket.on('updateEvent', event => this.setState({ event }, () => console.log(this.state)));
 
         this.socket.on('updateMonster', monster => this.setState({ monster }, () => console.log(this.state)));
+
+        this.socket.on('updateMonsterHealth', health => this.setState({ health }, () => console.log(this.state)));
+
+        this.socket.on('updateBattle', (battle, id) => this.setState({ battle, battleTurn: id }, () => console.log(this.state)));
+
+        this.socket.on('updateGame', (health, event, monster, active, battleTurn, battle, modifier, prompt, challenge) => this.setState({ health, event, monster, active, battleTurn, battle, modifier, prompt, challenge }, () => console.log(this.state)));
+
+        this.socket.on('updatePrompt', (prompt, challenge) => this.setState({ prompt, challenge }, () => console.log(this.state)));
     }
 
     render() {

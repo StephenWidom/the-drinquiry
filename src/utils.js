@@ -1,14 +1,14 @@
-export const isInGame = (id, players) => {
-    return players.some(p => p.id === id);
-}
+export const isInGame = (id, players) => players.some(p => p.id === id);
 
-export const getPlayer = (id, players) => {
-    return players.find(p => p.id === id);
-}
+export const getPlayer = (id, players) => players.find(p => p.id === id);
 
-export const getActivePlayer = players => {
-    return players.find(p => p.active);
-}
+export const getActivePlayer = (active, players) => players.find(p => p.id === active);
+
+export const isActive = (active, player) => player.id === active;
+
+export const getBattlingPlayer = (battleTurn, players) => players.find(p => p.id === battleTurn);
+
+export const isBattling = (battleTurn, player) => player.id === battleTurn;
 
 export const categories = [
     "Movies featuring Nicolas Cage",
