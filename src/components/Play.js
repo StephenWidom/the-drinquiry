@@ -6,6 +6,7 @@ import DrawButtons from './DrawButtons';
 import Event from './Event';
 import Monster from './Monster';
 import CardContainer from './CardContainer';
+import MobileCardContainer from './MobileCardContainer';
 import BattleMessage from './BattleMessage';
 import BattleInterface from './BattleInterface';
 import Prompt from './Prompt';
@@ -19,7 +20,7 @@ export default class Play extends Component {
     }
 
     render() {
-        const { socket, players, started, battle, active, prompt } = this.props;
+        const { socket, players, started, battle, active, prompt, monster, event } = this.props;
         const me = getPlayer(socket.id, players);
         return <div className='Play'>
             {!isInGame(socket.id, players) && <Redirect to='/join' />}
@@ -37,6 +38,10 @@ export default class Play extends Component {
                             <Monster {...this.props} player={me} />
                             {battle && !!prompt && <Prompt {...this.props} />}
                         </CardContainer>
+                        <MobileCardContainer>
+                            {!battle && event && !monster && !prompt && <Event {...this.props} player={me} />}
+                            {monster && !battle && <Monster {...this.props} player={me} />}
+                        </MobileCardContainer>
                     </>
                     : battle
                         ? <>

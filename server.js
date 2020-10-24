@@ -5,7 +5,7 @@ const fs = require('fs');
 const socketIO = require('socket.io');
 const _ = require('lodash');
 
-const PORT = 4002;
+const PORT = 4003;
 
 const options = {
     key: fs.readFileSync(process.env.REACT_APP_KEY),
