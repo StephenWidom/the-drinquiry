@@ -66,28 +66,6 @@ module.exports = [
         src: 'orange_demon_new',
     },
     {
-        name: 'Quicksilver Dragon',
-        health: 3,
-        challenge: 'trivia',
-        reward: 'none',
-        src: 'quicksilver_dragon_new',
-    },
-    {
-        name: 'Reaper',
-        health: 4,
-        challenge: 'trivia',
-        reward: '+1 life',
-        src: 'reaper_new',
-        code: `socket.emit('updateHealth', player.id, 1);`,
-    },
-    {
-        name: 'Shadow Fiend',
-        health: 5,
-        challenge: 'trivia',
-        reward: 'make a rule',
-        src: 'shadow_fiend_new',
-    },
-    {
         name: 'Shining Eye',
         health: 15,
         challenge: 'random',
