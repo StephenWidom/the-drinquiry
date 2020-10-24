@@ -285,6 +285,9 @@ const nextPlayer = (id, players) => {
     if (actualIndex >= players.length)
         actualIndex = 0;
 
+    if (players[actualIndex].dead === true)
+        return nextPlayer(players[actualIndex].id, players);
+
     return players[actualIndex];
 }
 
