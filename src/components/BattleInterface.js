@@ -12,7 +12,7 @@ const BattleInterface = props => {
 
     const missMonster = () => {
         if (isBattling(battleTurn, player))
-            socket.emit('takeDamage');
+            socket.emit('missAttack');
     }
 
     const skipAttack = () => {

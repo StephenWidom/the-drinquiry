@@ -62,11 +62,4 @@ module.exports = [
         src: 'zot',
         code: `socket.emit('absoluteDisaster');`,
     },
-    {
-        name: 'Dodge',
-        text: 'Skip the monster this turn',
-        modifier: 0,
-        src: 'blink',
-        code: `socket.emit('dodge');`,
-    },
 ];

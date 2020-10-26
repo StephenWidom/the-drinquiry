@@ -3,15 +3,19 @@ import { Redirect } from 'react-router-dom';
 
 import Game from './Game';
 import Wait from './Wait';
+import Winner from './Winner';
+import Player from './Player';
 
 const Host = props => {
-    const { host, started } = props;
+    const { host, started, winner } = props;
     return <div className='Host'>
         {!host && <Redirect to='/' />}
         <div className='container'>
             {started
                 ? <Game {...props} />
-                : <Wait {...props} />
+                : winner
+                    ? <Winner {...props} />
+                    : <Wait {...props} />
             }
         </div>
     </div>;

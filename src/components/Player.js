@@ -20,6 +20,7 @@ const Player = props => {
             ${isActive(active, player) ? 'active' : ''}
             ${isBattling(battleTurn, player) ? 'battling' : 'nah'}
             ${player.connected ? '' : 'disconnected'}
+            ${player.winner ? 'winner' : ''}
         `}>
         <img className={`avatar ${started ? '' : 'allowchange'}`} src={require(`../assets/${player.character}.png`)} alt='' onClick={changeCharacter} />
         <h3>{player.name}</h3>

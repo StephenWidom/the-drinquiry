@@ -27,6 +27,8 @@ class App extends PureComponent {
             prompt: null,
             challenge: null,
             disconnected: false,
+            suddenDeath: false,
+            winner: null,
         };
         this.socket = socketIOClient(process.env.REACT_APP_ADDR);
     }
@@ -59,6 +61,8 @@ class App extends PureComponent {
         this.socket.on('bootPlayer', () => {
             this.setState({ disconnected: true }, () => this.socket.disconnect(true));
         });
+
+        this.socket.on('gameWon', player => this.setState({ winner: player, started: false }));
     }
 
     render() {

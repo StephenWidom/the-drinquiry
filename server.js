@@ -39,6 +39,8 @@ const game = {
     categories:  _.shuffle(require('./src/categories')),
     challenge: null,
     lastChallenge: null,
+    suddenDeath: false,
+    winner: null,
 };
 
 io.on('connection', socket => {
@@ -94,7 +96,7 @@ io.on('connection', socket => {
                 health: 3,
                 potions: 0,
                 connected: true,
-                character: (name === 'FUCHIASS') ? 'fuchiass' : getNextCharacter(0),
+                character: (name === 'FUCHIASS') ? 'fuchiass' : getNextCharacter(_.random(characters.length - 1)),
                 dead: false,
                 amulet: false,
                 book: false,
@@ -140,6 +142,8 @@ io.on('connection', socket => {
                 thisPlayer.health = 5;
             if (!thisPlayer.health)
                 thisPlayer.dead = true;
+
+            checkWinCondition();
             io.emit('updatePlayers', players);
         }
     });
@@ -232,15 +236,13 @@ io.on('connection', socket => {
         io.emit('updateBattle', true, game.battleTurn);
     });
 
-    socket.on('takeDamage', () => {
+    socket.on('missAttack', () => {
         const { players, battleTurn, health } = game;
         const thisPlayer = players.find(p => p.id === battleTurn);
         if (!_.isNil(thisPlayer)) {
             if (!thisPlayer.shield || health > 2) {
-                thisPlayer.health--;
-                if (!thisPlayer.health)
-                    thisPlayer.dead = true;
 
+                takeDamage(thisPlayer);
                 io.emit('updatePlayers', players);
             }
         }
@@ -253,10 +255,8 @@ io.on('connection', socket => {
         const { players, health } = game;
         const thisPlayer = players.find(p => p.id === id);
         if (!_.isNil(thisPlayer)) {
-            if (!thisPlayer.shield || health > 2) {
-                thisPlayer.health--;
-                if (!thisPlayer.health)
-                    thisPlayer.dead = true;
+            if (!thisPlayer.shield || health > 1) { // Health must be 1 because one was subtracted by accidental hit
+                takeDamage(thisPlayer);
 
                 io.emit('updatePlayers', players);
             }
@@ -281,10 +281,8 @@ io.on('connection', socket => {
 
     socket.on('absoluteDisaster', () => {
         const { players } = game;
-        players.forEach(p => {
-            p.health--;
-            if (!p.health)
-                p.dead = true;
+        players.forEach(player => {
+            takeDamage(player);
         });
         io.emit('updatePlayers', players);
     });
@@ -350,9 +348,44 @@ const nextPlayerId = (id, players) => {
 };
 
 const getMonster = () => {
+    if (game.suddenDeath) {
+        return {
+            name: 'Kratos on Acid',
+            health: 99,
+            challenge: 'random',
+            reward: 'none',
+            src: 'kratos_on_acid',
+        };
+    }
     const randInt = _.random(monsters.length - 1);
     const thisMonster = monsters[randInt];
     return (thisMonster.challenge === game.lastChallenge) ? getMonster() : thisMonster;
+};
+
+const takeDamage = player => {
+    player.health--;
+    if (!player.health)
+        player.dead = true;
+
+    checkWinCondition();
+};
+
+const checkWinCondition = () => {
+    const { players } = game;
+    const alivePlayers = players.filter(p => !p.dead);
+
+    // If no one is alive
+    if (alivePlayers.length === 0) {
+        // No one wins
+    } else if (alivePlayers.length === 1) {
+        // We have a winner!
+        game.started = false;
+        game.winner = alivePlayers[0];
+        io.emit('gameWon', game.winner);
+    } else if (alivePlayers.length === 2) {
+        game.suddenDeath = true;
+    }
+    return;
 };
 
 const resetGame = () => {
@@ -363,6 +396,7 @@ const resetGame = () => {
     game.prompt = null;
     game.rhymes = _.shuffle(require('./src/rhymes'));
     game.categories = _.shuffle(require('./src/categories'));
+    game.suddenDeath = false;
 };
 
 const endBattle = () => {

@@ -11,9 +11,11 @@ import { getActivePlayer } from '../utils';
 const Game = props => {
     const { players, battle, prompt, active } = props;
     const activePlayer = useRef(getActivePlayer(active, players));
+
     useEffect(() => {
         activePlayer.current = getActivePlayer(active, players);
     }, [active, players]);
+
     return <div className='Game'>
         {activePlayer.current && <h2>{activePlayer.current.name}'s Turn</h2>}
         <Players {...props} slim={true} />
