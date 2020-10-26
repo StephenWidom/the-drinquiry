@@ -25,7 +25,7 @@ export default class Play extends PureComponent {
         return <div className='Play'>
             {!isInGame(socket.id, players) && <Redirect to='/join' />}
             <div className='container'>
-                {me && <Player player={me} socket={socket} />}
+                {me && <Player player={me} socket={socket} {...this.props} />}
                 {me && isActive(active, me)
                     ? <>
                         {battle && <>

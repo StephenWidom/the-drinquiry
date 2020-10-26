@@ -8,9 +8,15 @@ import Shield from './Shield';
 import { isBattling, isActive } from '../utils';
 
 const Player = props => {
-    const { player, socket, battleTurn, active } = props;
+    const { player, socket, battleTurn, active, started } = props;
+
+    const changeCharacter = () => {
+        if (!started)
+            socket.emit('changeCharacter');
+    }
+
     return <div className={`Player ${player.dead ? 'dead' : ''} ${isActive(active, player) ? 'active' : ''} ${isBattling(battleTurn, player) ? 'battling' : 'nah'}`}>
-        <img className='avatar' src={require(`../assets/${player.character}.png`)} alt='' />
+        <img className={`avatar ${started ? '' : 'allowchange'}`} src={require(`../assets/${player.character}.png`)} alt='' onClick={changeCharacter} />
         <h3>{player.name}</h3>
         <Health player={player} socket={socket} />
         <Potions player={player} socket={socket} />
