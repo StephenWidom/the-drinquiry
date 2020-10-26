@@ -9,8 +9,11 @@ const Join = props => {
 
     useEffect(() => {
         const form = document.querySelector('form');
-        form.name.focus();
-
+        if (localStorage.getItem('playerName')) {
+            form.name.value = localStorage.playerName;
+        } else {
+            form.name.focus();
+        }
         const { socket } = props;
         socket.on('joinError', error => setError(error));
     }, []);
@@ -36,6 +39,7 @@ const Join = props => {
         }
 
         const { socket } = props;
+        localStorage.setItem('playerName', name.value.trim().toUpperCase());
         socket.emit('joinSocketRoom', false, name.value.trim().toUpperCase());
     }
 

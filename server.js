@@ -58,14 +58,28 @@ io.on('connection', socket => {
                 return;
             }
 
-            if (game.started) {
-                socket.emit('joinError', 'The game already started!');
-                return;
+            const { players } = game;
+            // Someone tryna reconnect
+            // Have to search by name as id would change on reconnect
+            const thisPlayer = players.find(p => p.name === name);
+            // If we've found a player with this name
+            if (!_.isNil(thisPlayer)) {
+                if (thisPlayer.connected) {
+                    socket.emit('joinError', 'Someone is using that name!');
+                    return;
+                } else {
+                    thisPlayer.connected = true;
+                    thisPlayer.id = socket.id;
+                    io.emit('updatePlayers', players);
+                    socket.emit('goToLobby');
+                    if (game.started)
+                        socket.emit('gameStarted');
+                    return;
+                }
             }
 
-            const { players } = game;
-            if (players.some(p => p.name === name)) {
-                socket.emit('joinError', 'Someone is using that name!');
+            if (game.started) {
+                socket.emit('joinError', 'The game already started!');
                 return;
             }
 
@@ -106,6 +120,7 @@ io.on('connection', socket => {
         const shuffledPlayers = _.shuffle(game.players);
         game.players = shuffledPlayers;
         game.active = shuffledPlayers[0].id;
+        game.started = true;
         game.players[0].active = true;
 
         io.emit('updatePlayers', game.players);
@@ -264,12 +279,28 @@ io.on('connection', socket => {
 
     socket.on('disconnect', () => {
         socket.removeAllListeners();
-        const { host } = game;
+        const { host, players } = game;
 
         if (socket.id === host) {
             resetGame();
+            io.emit('bootPlayer');
         } else {
-            return;
+            // Game has already been reset
+            if (!host)
+                return;
+
+            const thisPlayer = players.find(p => p.id === socket.id);
+            if (!_.isNil(thisPlayer)) {
+                thisPlayer.connected = false;
+                io.emit('updatePlayers', players);
+
+                // What if it was their turn when they disconnected
+                if (game.active === socket.id) {
+                    endBattle();
+                    io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null);
+                }
+
+            }
         }
     })
 
@@ -288,7 +319,7 @@ const nextPlayer = (id, players) => {
     if (actualIndex >= players.length)
         actualIndex = 0;
 
-    if (players[actualIndex].dead === true)
+    if (players[actualIndex].dead || !players[actualIndex].connected)
         return nextPlayer(players[actualIndex].id, players);
 
     return players[actualIndex];
@@ -326,7 +357,6 @@ const endBattle = () => {
     game.prompt = null;
     game.lastChallenge = game.challenge;
     game.challenge = null;
-
 };
 
 const getNextCharacter = i => {

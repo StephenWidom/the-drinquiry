@@ -15,7 +15,12 @@ const Player = props => {
             socket.emit('changeCharacter');
     }
 
-    return <div className={`Player ${player.dead ? 'dead' : ''} ${isActive(active, player) ? 'active' : ''} ${isBattling(battleTurn, player) ? 'battling' : 'nah'}`}>
+    return <div className={`Player 
+            ${player.dead ? 'dead' : ''}
+            ${isActive(active, player) ? 'active' : ''}
+            ${isBattling(battleTurn, player) ? 'battling' : 'nah'}
+            ${player.connected ? '' : 'disconnected'}
+        `}>
         <img className={`avatar ${started ? '' : 'allowchange'}`} src={require(`../assets/${player.character}.png`)} alt='' onClick={changeCharacter} />
         <h3>{player.name}</h3>
         <Health player={player} socket={socket} />

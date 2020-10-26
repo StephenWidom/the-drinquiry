@@ -60,7 +60,11 @@ h2
     .Player:not(.active)
       padding-top: 15px
       border: 4px solid $purple
-      height: 105px
+      height: 95px
+
+      h3
+        font-size: 19px
+        margin-bottom: 5px
 
       .avatar,
       .Potions
@@ -68,7 +72,23 @@ h2
 
       .Amulet,
       .Shield
-        top: 2px
+        top: 6px
+
+        img
+          width: 24px
+          height: auto
+
+      .Amulet
+        left: 10px
+
+      .Shield
+        right: 10px
+
+      .Health
+
+        img
+          width: 24px
+          height: auto
 
       &.battling
         border: 8px solid $pink
@@ -93,7 +113,8 @@ h2
     .Shield
       border: 1px dotted $gray
 
-  &.dead
+  &.dead,
+  &.disconnected
     background: $gray
 
     &:after
@@ -398,33 +419,12 @@ h2
     color: $pink
     font-family: 'Grenze Gotisch'
 
-@media (max-width: 767px) and (min-width: 480px)
-  .container
-    width: 480px
+.Disconnected
+  
+  h4
+    text-align: center
+    font-size: 28px
+    color: #fff
 
-  h1
-    font-size: 50px
-
-  h2
-    font-size: 40px
-
-@media (max-width: 480px)
-  .container
-    width: 96%
-
-  h1
-    font-size: 42px
-
-  h2
-    font-size: 22px
-
-  .CardContainer
-    display: none
-
-  .MobileCardContainer
-    display: block
-
-    .Event,
-    .Monster,
-    .Prompt
-      margin: 20px auto
+    a
+      color: $pink

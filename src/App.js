@@ -26,6 +26,7 @@ class App extends PureComponent {
             battle: false,
             prompt: null,
             challenge: null,
+            disconnected: false,
         };
         this.socket = socketIOClient(process.env.REACT_APP_ADDR);
     }
@@ -54,6 +55,10 @@ class App extends PureComponent {
         this.socket.on('updateGame', (health, event, monster, active, battleTurn, battle, modifier, prompt, challenge) => this.setState({ health, event, monster, active, battleTurn, battle, modifier, prompt, challenge }, () => console.log(this.state)));
 
         this.socket.on('updatePrompt', (prompt, challenge) => this.setState({ prompt, challenge }, () => console.log(this.state)));
+
+        this.socket.on('bootPlayer', () => {
+            this.setState({ disconnected: true }, () => this.socket.disconnect(true));
+        });
     }
 
     render() {

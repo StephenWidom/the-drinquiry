@@ -10,47 +10,48 @@ import MobileCardContainer from './MobileCardContainer';
 import BattleMessage from './BattleMessage';
 import BattleInterface from './BattleInterface';
 import Prompt from './Prompt';
+import Disconnected from './Disconnected';
 import { isInGame, getPlayer, isActive } from '../utils';
 
 export default class Play extends PureComponent {
-    constructor(props) {
-        super(props);
-
-        this.state = {};
-    }
 
     render() {
-        const { socket, players, started, battle, active, prompt, monster, event } = this.props;
+        const { socket, players, started, battle, active, prompt, monster, event, disconnected } = this.props;
         const me = getPlayer(socket.id, players);
         return <div className='Play'>
             {!isInGame(socket.id, players) && <Redirect to='/join' />}
             <div className='container'>
-                {me && <Player player={me} socket={socket} {...this.props} />}
-                {me && isActive(active, me)
-                    ? <>
-                        {battle && <>
-                            <BattleMessage {...this.props} />
-                            <BattleInterface player={me} {...this.props} />
-                        </>}
-                        <DrawButtons player={me} socket={socket} {...this.props} />
-                        <CardContainer>
-                            {!battle && <Event {...this.props} player={me} />}
-                            <Monster {...this.props} player={me} />
-                            {battle && !!prompt && <Prompt {...this.props} />}
-                        </CardContainer>
-                        <MobileCardContainer>
-                            {!battle && event && !monster && !prompt && <Event {...this.props} player={me} />}
-                            {monster && !battle && <Monster {...this.props} player={me} />}
-                        </MobileCardContainer>
-                    </>
-                    : battle
+                {disconnected
+                    ? <Disconnected />
+                    : <>
+                    {me && <Player player={me} socket={socket} {...this.props} />}
+                    {me && isActive(active, me)
                         ? <>
-                            <BattleMessage {...this.props} />
-                            <BattleInterface player={me} {...this.props} />
+                            {battle && <>
+                                <BattleMessage {...this.props} />
+                                <BattleInterface player={me} {...this.props} />
+                            </>}
+                            <DrawButtons player={me} socket={socket} {...this.props} />
+                            <CardContainer>
+                                {!battle && <Event {...this.props} player={me} />}
+                                <Monster {...this.props} player={me} />
+                                {battle && !!prompt && <Prompt {...this.props} />}
+                            </CardContainer>
+                            <MobileCardContainer>
+                                {!battle && event && !monster && !prompt && <Event {...this.props} player={me} />}
+                                {monster && !battle && <Monster {...this.props} player={me} />}
+                            </MobileCardContainer>
                         </>
-                        : started
-                            ? <h2>Awaiting the battle...</h2>
-                            : <h2>Waiting for the game to begin</h2>
+                        : battle
+                            ? <>
+                                <BattleMessage {...this.props} />
+                                <BattleInterface player={me} {...this.props} />
+                            </>
+                            : started
+                                ? <h2>Awaiting the battle...</h2>
+                                : <h2>Waiting for the game to begin</h2>
+                    }
+                    </>
                 }
             </div>
         </div>;
