@@ -17,7 +17,7 @@ const server = https.createServer(options, app);
 const io = socketIO(server);
 
 // Import characters and shuffle 'em up
-const characters = _.shuffle(require('./src/characters'));
+const characters = require('./src/characters');
 
 // Grab monster and event cards
 const monsters = _.shuffle(require('./src/monsters'));
@@ -80,7 +80,7 @@ io.on('connection', socket => {
                 health: 3,
                 potions: 0,
                 connected: true,
-                character: characters.shift(),
+                character: getNextCharacter(0),
                 dead: false,
                 amulet: false,
                 book: false,
@@ -89,6 +89,16 @@ io.on('connection', socket => {
             });
             io.emit('updatePlayers', players);
             socket.emit('goToLobby');
+        }
+    });
+
+    socket.on('changeCharacter', () => {
+        const { players } = game;
+        const thisPlayer = players.find(p => p.id === socket.id);
+        if (!_.isNil(thisPlayer)) {
+            const index = characters.findIndex(c => c === thisPlayer.character);
+            thisPlayer.character = getNextCharacter(index);
+            io.emit('updatePlayers', players);
         }
     });
 
@@ -318,3 +328,10 @@ const endBattle = () => {
     game.challenge = null;
 
 };
+
+const getNextCharacter = i => {
+    const { players } = game;
+    const index = (i > characters.length - 1) ? 0 : i;
+    const nextCharacter = characters[index];
+    return (players.some(p => p.character === nextCharacter)) ? getNextCharacter(i + 1) : nextCharacter;
+}
