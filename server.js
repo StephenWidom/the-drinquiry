@@ -94,7 +94,7 @@ io.on('connection', socket => {
                 health: 3,
                 potions: 0,
                 connected: true,
-                character: getNextCharacter(0),
+                character: (name === 'FUCHIASS') ? 'fuchiass' : getNextCharacter(0),
                 dead: false,
                 amulet: false,
                 book: false,
@@ -110,6 +110,9 @@ io.on('connection', socket => {
         const { players } = game;
         const thisPlayer = players.find(p => p.id === socket.id);
         if (!_.isNil(thisPlayer)) {
+            if (thisPlayer.character === 'fuchiass')
+                return;
+
             const index = characters.findIndex(c => c === thisPlayer.character);
             thisPlayer.character = getNextCharacter(index);
             io.emit('updatePlayers', players);
@@ -176,7 +179,6 @@ io.on('connection', socket => {
     });
 
     socket.on('initMonster', monster => {
-        console.log('initMonster');
         game.health = monster.health + game.modifier;
         io.emit('updateMonsterHealth', game.health);
 
@@ -275,6 +277,23 @@ io.on('connection', socket => {
         const shuffledPlayers = _.shuffle(game.players);
         game.players = shuffledPlayers;
         io.emit('updatePlayers', game.players);
+    });
+
+    socket.on('absoluteDisaster', () => {
+        const { players } = game;
+        players.forEach(p => {
+            p.health--;
+            if (!p.health)
+                p.dead = true;
+        });
+        io.emit('updatePlayers', players);
+    });
+
+    socket.on('dodge', () => {
+        endBattle();
+        setTimeout(() => {
+            io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null);
+        }, 2500);
     });
 
     socket.on('disconnect', () => {

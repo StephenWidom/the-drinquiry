@@ -29,17 +29,17 @@ module.exports = [
     },
     {
         name: 'Monster Strength',
-        text: 'The next monster has +2 health',
-        modifier: 2,
+        text: 'The next monster has +3 health',
+        modifier: 3,
         src: 'misc_deck_legendary_new',
-        code: `socket.emit('updateModifier', 2);`,
+        code: `socket.emit('updateModifier', 3);`,
     },
     {
         name: 'Rune of Strength',
-        text: 'The next monster has -2 health',
-        modifier: -2,
+        text: 'The next monster has -3 health',
+        modifier: -3,
         src: 'rune_abyss',
-        code: `socket.emit('updateModifier', -2);`,
+        code: `socket.emit('updateModifier', -3);`,
     },
     {
         name: 'Cloud of Confusion',
@@ -54,5 +54,19 @@ module.exports = [
         modifier: 0,
         src: 'cloud_meph_2',
         code: `socket.emit('updateHealth', player.id, -1);`,
-    }
+    },
+    {
+        name: 'Absolute Disaster',
+        text: 'All players lose one life!',
+        modifier: 0,
+        src: 'zot',
+        code: `socket.emit('absoluteDisaster');`,
+    },
+    {
+        name: 'Dodge',
+        text: 'Skip the monster this turn',
+        modifier: 0,
+        src: 'blink',
+        code: `socket.emit('dodge');`,
+    },
 ];

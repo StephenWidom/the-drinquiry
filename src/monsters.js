@@ -1,14 +1,14 @@
 module.exports = [
     {
         name: 'Treant',
-        health: 9,
+        health: 10,
         challenge: 'category',
         reward: 'none',
         src: 'treant',
     },
     {
         name: 'Abomination',
-        health: 12,
+        health: 15,
         challenge: 'category',
         reward: '+1 life',
         src: 'abomination_large_2',
@@ -16,21 +16,21 @@ module.exports = [
     },
     {
         name: 'Draconic',
-        health: 15,
+        health: 18,
         challenge: 'category',
         reward: 'make a rule',
         src: 'draconic_base-black_new',
     },
     {
         name: 'Efreet',
-        health: 9,
+        health: 10,
         challenge: 'sentence',
         reward: 'none',
         src: 'efreet',
     },
     {
         name: 'Executioner',
-        health: 12,
+        health: 15,
         challenge: 'sentence',
         reward: '+1 life',
         src: 'executioner',
@@ -38,7 +38,7 @@ module.exports = [
     },
     {
         name: 'Golden Dragon',
-        health: 15,
+        health: 18,
         challenge: 'sentence',
         reward: 'make a rule',
         src: 'golden_dragon',
@@ -67,7 +67,7 @@ module.exports = [
     },
     {
         name: 'Shining Eye',
-        health: 15,
+        health: 12,
         challenge: 'random',
         reward: '+1 potion',
         src: 'shining_eye_new',
@@ -83,7 +83,7 @@ module.exports = [
     },
     {
         name: 'Vine Stalker',
-        health: 15,
+        health: 18,
         challenge: 'random',
         reward: '+1 potion',
         src: 'ugly_thing',

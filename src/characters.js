@@ -7,4 +7,8 @@ module.exports = [
     'erica',
     'paladin',
     'archer',
+    'hellknight',
+    'hobgoblin',
+    'merfolk',
+    'satyr',
 ];
