@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import Player from './Player';
@@ -12,7 +12,7 @@ import BattleInterface from './BattleInterface';
 import Prompt from './Prompt';
 import { isInGame, getPlayer, isActive } from '../utils';
 
-export default class Play extends Component {
+export default class Play extends PureComponent {
     constructor(props) {
         super(props);
 

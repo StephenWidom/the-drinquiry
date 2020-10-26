@@ -300,7 +300,7 @@ h2
     margin-bottom: 70px
   
   h3:last-child
-    font-size: 35px
+    font-size: 32px
     position: absolute
     bottom: 10px
     margin: 0
@@ -331,19 +331,25 @@ h2
 
   &.inactive
 
-    &>div
+    .skip,
+    .miss,
+    .hit
       cursor: auto
       background: $gray
 
       img
         filter: grayscale(100%)
 
-    &>div:hover
+    .skip:hover,
+    .miss:hover,
+    .hit:hover
 
       img
         transform: none
 
-  &>div
+  .skip,
+  .miss,
+  .hit
     border: 8px solid $purple
     cursor: pointer
     padding: 10px

@@ -1,19 +1,27 @@
 import React from 'react';
+import LongPressable from 'react-longpressable';
 
 import { isBattling } from '../utils';
 
 const BattleInterface = props => {
     const { player, socket, battleTurn } = props;
     const hitMonster = () => {
-        socket.emit('hitMonster');
+        if (isBattling(battleTurn, player))
+            socket.emit('hitMonster');
     }
 
     const missMonster = () => {
-        socket.emit('takeDamage');
+        if (isBattling(battleTurn, player))
+            socket.emit('takeDamage');
     }
 
     const skipAttack = () => {
-        socket.emit('skipAttack');
+        if (isBattling(battleTurn, player))
+            socket.emit('skipAttack');
+    }
+
+    const fuckedUp = () => {
+        socket.emit('fuckedUp', player.id);
     }
 
     return <div className={`BattleInterface ${isBattling(battleTurn, player) ? '' : 'inactive'}`}>
@@ -23,9 +31,15 @@ const BattleInterface = props => {
         {!!player.potions && <div className='skip' onClick={skipAttack}>
             <img src={require('../assets/cyan_new.png')} alt='potion' />
         </div>}
-        <div className='miss' onClick={missMonster}>
-            <img src={require('../assets/sensed_monster_nasty.png')} alt='' />
-        </div>
+        <LongPressable
+            onShortPress={missMonster}
+            onLongPress={fuckedUp}
+            longPressTime={1000}
+        >
+            <div className='miss'>
+                <img src={require('../assets/sensed_monster_nasty.png')} alt='' />
+            </div>
+        </LongPressable>
     </div>
 };
 

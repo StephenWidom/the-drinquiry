@@ -1,35 +1,43 @@
-import React, { useEffect } from 'react';
+import React, { PureComponent } from 'react';
 
-const Event = props => {
-    const { event, socket, player } = props;
-    useEffect(() => {
-        if (!player || !event)
+export default class Event extends PureComponent {
+
+    componentDidUpdate(prevProps) {
+        const { event, player, socket } = this.props;
+        // Don't execute card code for host
+        if (!player)
             return;
 
-        console.log('EVALING');
+        if (!!event && prevProps.event !== event) {
+            if (event.code) {
+                setTimeout(() => {
+                    eval(event.code);
+                }, 1000);
+            }
+        }
+    }
 
-        if (event.code)
-            eval(event.code);
-    }, [event]);
-
-    const handleEventClick = () => {
+    handleEventClick = () => {
+        const { event, socket } = this.props;
         if (!event)
             socket.emit('drawEvent');
     }
 
-    return <div className='Event' onClick={handleEventClick}>
-        {event
-            ? <>
-                <h3>{event.name}</h3>
-                <img src={require(`../assets/${event.src}.png`)} alt='' />
-                <p>{event.text}</p>
-            </>
-            : <>
-                <img className='placeholder' src={require('../assets/polymorph_other.png')} alt='' />
-                <h6>Event</h6>
-            </>
-        }
-    </div>;
-};
+    render() {
+        const { event } = this.props;
+        return <div className='Event' onClick={this.handleEventClick}>
+            {event
+                ? <>
+                    <h3>{event.name}</h3>
+                    <img src={require(`../assets/${event.src}.png`)} alt='' />
+                    <p>{event.text}</p>
+                </>
+                : <>
+                    <img className='placeholder' src={require('../assets/polymorph_other.png')} alt='' />
+                    <h6>Event</h6>
+                </>
+            }
+        </div>;
+    }
 
-export default Event;
+}

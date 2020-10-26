@@ -38,6 +38,7 @@ const game = {
     rhymes: _.shuffle(require('./src/rhymes')),
     categories:  _.shuffle(require('./src/categories')),
     challenge: null,
+    lastChallenge: null,
 };
 
 io.on('connection', socket => {
@@ -145,8 +146,7 @@ io.on('connection', socket => {
     });
 
     socket.on('drawMonster', id => {
-        const randInt = _.random(monsters.length - 1);
-        game.monster = monsters[randInt];
+        game.monster = getMonster();
         io.emit('updateMonster', game.monster);
     });
 
@@ -217,30 +217,29 @@ io.on('connection', socket => {
                 io.emit('updatePlayers', players);
             }
         }
-        game.health = null;
-        game.event = null;
-        game.monster = null;
-        game.active = nextPlayerId(game.active, players);
-        game.battleTurn = null;
-        game.battle = false;
-        game.modifier = 0;
-        game.prompt = null;
-        game.challenge = null;
+        endBattle();
+        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null);
+    });
 
+    // Player accidentally pressed hit but had an invalid attack
+    socket.on('fuckedUp', id => {
+        const { players, health } = game;
+        const thisPlayer = players.find(p => p.id === id);
+        if (!_.isNil(thisPlayer)) {
+            if (!thisPlayer.shield || health > 2) {
+                thisPlayer.health--;
+                if (!thisPlayer.health)
+                    thisPlayer.dead = true;
+
+                io.emit('updatePlayers', players);
+            }
+        }
+        endBattle();
         io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null);
     });
 
     socket.on('defeatMonster', () => {
-        game.health = null;
-        game.event = null;
-        game.monster = null;
-        game.active = nextPlayerId(game.active, game.players);
-        game.battleTurn = null;
-        game.battle = false;
-        game.modifier = 0;
-        game.prompt = null;
-        game.challenge = null;
-
+        endBattle();
         // Slight delay to peep the reward
         setTimeout(() => {
             io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null);
@@ -258,13 +257,7 @@ io.on('connection', socket => {
         const { host } = game;
 
         if (socket.id === host) {
-            game.host = null;
-            game.players = [];
-            game.started = false;
-            game.active = null;
-            game.prompt = null;
-            game.rhymes = _.shuffle(require('./src/rhymes'));
-            game.categories = _.shuffle(require('./src/categories'));
+            resetGame();
         } else {
             return;
         }
@@ -294,4 +287,34 @@ const nextPlayer = (id, players) => {
 const nextPlayerId = (id, players) => {
     const nextJawn = nextPlayer(id, players);
     return nextJawn.id;
+};
+
+const getMonster = () => {
+    const randInt = _.random(monsters.length - 1);
+    const thisMonster = monsters[randInt];
+    return (thisMonster.challenge === game.lastChallenge) ? getMonster() : thisMonster;
+};
+
+const resetGame = () => {
+    game.host = null;
+    game.players = [];
+    game.started = false;
+    game.active = null;
+    game.prompt = null;
+    game.rhymes = _.shuffle(require('./src/rhymes'));
+    game.categories = _.shuffle(require('./src/categories'));
+};
+
+const endBattle = () => {
+    game.health = null;
+    game.event = null;
+    game.monster = null;
+    game.active = nextPlayerId(game.active, game.players);
+    game.battleTurn = null;
+    game.battle = false;
+    game.modifier = 0;
+    game.prompt = null;
+    game.lastChallenge = game.challenge;
+    game.challenge = null;
+
 };
