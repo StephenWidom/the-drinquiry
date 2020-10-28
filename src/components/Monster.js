@@ -3,11 +3,10 @@ import { useSpring, animated } from 'react-spring';
 
 export default class Monster extends PureComponent {
     componentDidUpdate(prevProps) {
-        const { player, monster, health, socket } = this.props;
+        const { player, monster, health, socket, host } = this.props;
 
-        // Don't do anything for the host
         // Prevents these from running twice
-        if (!player || !monster)
+        if (!player || !monster || host)
             return;
 
         if (prevProps.monster === null && monster)
@@ -31,10 +30,10 @@ export default class Monster extends PureComponent {
     }
 
     render() {
-        const { monster, health } = this.props;
+        const { monster, health, battle } = this.props;
         return <div className='Monster' onClick={this.handleMonsterClick}>
             <MonsterBack monster={monster} />
-            {monster && <MonsterFront monster={monster} health={health} />}
+            {monster && <MonsterFront monster={monster} health={health} battle={battle} />}
         </div>;
     }
 };
@@ -54,13 +53,15 @@ const MonsterBack = props => {
 };
 
 const MonsterFront = props => {
-    const { monster, health } = props;
+    const { monster, health, battle } = props;
     const styles = useSpring({
         transform: monster ? 'rotateY(0deg)' : 'rotateY(90deg)',
         filter: health ? 'invert(0%)' : 'invert(100%)',
+        borderColor: battle ? '#fff' : '#EC4C70',
         from: {
             transform: 'rotateY(90deg)',
             filter: 'invert(0%)',
+            borderColor: '#fff',
         }
     });
     return <animated.div className='MonsterFront card' style={styles}>

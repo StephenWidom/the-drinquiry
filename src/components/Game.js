@@ -19,7 +19,7 @@ const Game = props => {
                 ? <Trivia {...props} player={activePlayer} />
                 : <Event {...props} player={activePlayer} host={true} />
             }
-            <Monster {...props} player={activePlayer} />
+            <Monster {...props} player={activePlayer} host={true} />
         </CardContainer>
     </div>;
 };

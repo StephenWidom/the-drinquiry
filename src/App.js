@@ -58,7 +58,7 @@ class App extends PureComponent {
 
         this.socket.on('updateGame', (health, event, monster, active, battleTurn, battle, modifier, prompt, challenge, triviaAnswer, triviaCategory) => this.setState({ health, event, monster, active, battleTurn, battle, modifier, prompt, challenge, triviaAnswer, triviaCategory }, () => console.log(this.state)));
 
-        this.socket.on('updatePrompt', (prompt, challenge, triviaCategory) => this.setState({ prompt, challenge, triviaCategory }, () => console.log(this.state)));
+        this.socket.on('updatePrompt', (prompt, challenge, triviaCategory, triviaAnswer = null) => this.setState({ prompt, challenge, triviaCategory, triviaAnswer }, () => console.log(this.state)));
 
         this.socket.on('bootPlayer', () => {
             this.setState({ disconnected: true }, () => this.socket.disconnect(true));
