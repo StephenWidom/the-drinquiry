@@ -44,6 +44,27 @@ module.exports = [
         src: 'golden_dragon',
     },
     {
+        name: 'Formicid',
+        health: 4,
+        challenge: 'trivia',
+        reward: 'none',
+        src: 'formicid',
+    },
+    {
+        name: 'Slimy Boi',
+        health: 5,
+        challenge: 'trivia',
+        reward: 'none',
+        src: 'giant_amoeba_new',
+    },
+    {
+        name: 'Fucking Bull Thing',
+        health: 6,
+        challenge: 'trivia',
+        reward: 'none',
+        src: 'mutant_beast',
+    },
+    {
         name: 'Infernal',
         health: 9,
         challenge: 'rhyme',

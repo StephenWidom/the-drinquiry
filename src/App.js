@@ -29,6 +29,8 @@ class App extends PureComponent {
             disconnected: false,
             suddenDeath: false,
             winner: null,
+            triviaAnswer: null,
+            triviaCategory: null,
         };
         this.socket = socketIOClient(process.env.REACT_APP_ADDR);
     }
@@ -54,13 +56,15 @@ class App extends PureComponent {
 
         this.socket.on('updateBattle', (battle, id) => this.setState({ battle, battleTurn: id }, () => console.log(this.state)));
 
-        this.socket.on('updateGame', (health, event, monster, active, battleTurn, battle, modifier, prompt, challenge) => this.setState({ health, event, monster, active, battleTurn, battle, modifier, prompt, challenge }, () => console.log(this.state)));
+        this.socket.on('updateGame', (health, event, monster, active, battleTurn, battle, modifier, prompt, challenge, triviaAnswer, triviaCategory) => this.setState({ health, event, monster, active, battleTurn, battle, modifier, prompt, challenge, triviaAnswer, triviaCategory }, () => console.log(this.state)));
 
-        this.socket.on('updatePrompt', (prompt, challenge) => this.setState({ prompt, challenge }, () => console.log(this.state)));
+        this.socket.on('updatePrompt', (prompt, challenge, triviaCategory) => this.setState({ prompt, challenge, triviaCategory }, () => console.log(this.state)));
 
         this.socket.on('bootPlayer', () => {
             this.setState({ disconnected: true }, () => this.socket.disconnect(true));
         });
+
+        this.socket.on('revealAnswer', triviaAnswer => this.setState({ triviaAnswer }));
 
         this.socket.on('gameWon', player => this.setState({ winner: player, started: false }));
     }

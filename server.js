@@ -4,6 +4,7 @@ const https = require('https');
 const fs = require('fs');
 const socketIO = require('socket.io');
 const _ = require('lodash');
+const fetch = require('node-fetch');
 
 const PORT = 4003;
 
@@ -41,6 +42,7 @@ const game = {
     lastChallenge: null,
     suddenDeath: false,
     winner: null,
+    triviaCategory: null,
 };
 
 io.on('connection', socket => {
@@ -53,6 +55,7 @@ io.on('connection', socket => {
                 return;
             }
             game.host = socket.id;
+            game.triviaQuestions = fetchTrivia();
             socket.emit('gameHosted');
         } else {
             if (!game.host) {
@@ -96,12 +99,13 @@ io.on('connection', socket => {
                 health: 3,
                 potions: 0,
                 connected: true,
-                character: (name === 'FUCHIASS') ? 'fuchiass' : getNextCharacter(_.random(characters.length - 1)),
+                character: getNextCharacter(_.random(characters.length - 1), name),
                 dead: false,
                 amulet: false,
                 book: false,
                 shield: false,
                 armor: false,
+                scroll: true,
             });
             io.emit('updatePlayers', players);
             socket.emit('goToLobby');
@@ -112,8 +116,14 @@ io.on('connection', socket => {
         const { players } = game;
         const thisPlayer = players.find(p => p.id === socket.id);
         if (!_.isNil(thisPlayer)) {
-            if (thisPlayer.character === 'fuchiass')
-                return;
+            // Special characters / easter eggs
+            const reservedNames = [
+                'plumson',
+                'fuchiass',
+                'obi',
+            ];
+            if (reservedNames.includes(thisPlayer.character))
+                return console.log('nice name');
 
             const index = characters.findIndex(c => c === thisPlayer.character);
             thisPlayer.character = getNextCharacter(index);
@@ -171,9 +181,18 @@ io.on('connection', socket => {
         }
     });
 
-    socket.on('drawEvent', id => {
-        const randInt = _.random(events.length - 1);
-        game.event = events[randInt];
+    socket.on('loseItems', id => {
+        const { players } = game;
+        const thisPlayer = players.find(p => p.id === id);
+        if (!_.isNil(thisPlayer)) {
+            thisPlayer.amulet = false;
+            thisPlayer.scroll = false;
+        }
+        io.emit('updatePlayers', players);
+    });
+
+    socket.on('drawEvent', player => {
+        game.event = pickEvent(player);
         io.emit('updateEvent', game.event);
     });
 
@@ -186,20 +205,25 @@ io.on('connection', socket => {
         game.health = monster.health + game.modifier;
         io.emit('updateMonsterHealth', game.health);
 
-        game.challenge = (monster.challenge === 'random') ? _.sample(['category', 'rhyme', 'sentence']) : monster.challenge;
-        switch(game.challenge) {
-            case 'category':
-                game.prompt = game.categories.pop();
-                break;
-            case 'rhyme':
-                game.prompt = game.rhymes.pop();
-                break;
-            default: // Sentence
-                game.prompt = null;
-        }
+        game.challenge = (monster.challenge === 'random') ? getRandomChallenge() : monster.challenge;
 
-        io.emit('updatePrompt', game.prompt, game.challenge);
+        game.prompt = getPrompt();
+        io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory);
+    });
 
+    socket.on('consumeScroll', () => {
+        io.emit('updatePrompt', null, game.challenge, null);
+        setTimeout(() => {
+            game.prompt = getPrompt(game.challenge);
+            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory);
+            
+            const { players } = game;
+            const thisPlayer = players.find(p => p.id === game.active);
+            if (!_.isNil(thisPlayer)) {
+                thisPlayer.scroll = false;
+                io.emit('updatePlayers', players);
+            }
+        }, 1000);
     });
 
     socket.on('updateModifier', modifier => {
@@ -247,7 +271,7 @@ io.on('connection', socket => {
             }
         }
         endBattle();
-        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null);
+        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null);
     });
 
     // Player accidentally pressed hit but had an invalid attack
@@ -262,15 +286,24 @@ io.on('connection', socket => {
             }
         }
         endBattle();
-        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null);
+        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null);
+    });
+
+    socket.on('revealAnswer', () => {
+        if (!game.battle)
+            return;
+
+        game.triviaAnswer = game.question.answer;
+        io.emit('revealAnswer', game.triviaAnswer);
     });
 
     socket.on('defeatMonster', () => {
         endBattle();
+        io.emit('updateBattle', false, null);
         // Slight delay to peep the reward
         setTimeout(() => {
             io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null);
-        }, 3500);
+        }, 3800);
     });
 
     socket.on('shufflePlayers', () => {
@@ -328,6 +361,12 @@ server.listen(PORT, () => {
 });
 
 const nextPlayer = (id, players) => {
+    if (!players.length)
+        return false;
+
+    if (players.every(p => p.dead || !p.connected))
+        return false;
+
     const playerIndex = players.findIndex(p => p.id === id);
     if (playerIndex === -1)
         return false;
@@ -344,10 +383,11 @@ const nextPlayer = (id, players) => {
 
 const nextPlayerId = (id, players) => {
     const nextJawn = nextPlayer(id, players);
-    return nextJawn.id;
+    return nextJawn ? nextJawn.id : null;
 };
 
 const getMonster = () => {
+    // If two players left, boss battle
     if (game.suddenDeath) {
         return {
             name: 'Kratos on Acid',
@@ -388,6 +428,66 @@ const checkWinCondition = () => {
     return;
 };
 
+const pickEvent = player => {
+    const randInt = _.random(events.length - 1);
+    const randEvent = events[randInt];
+
+    // Don't give em a scroll if they've got one
+    if (randEvent.src === 'scroll_yellow' && (player.scroll || game.suddenDeath))
+        return pickEvent(player);
+
+    // Don't give em an amulet if they've got one
+    if (randEvent.src === 'urand_bloodlust_new' && player.amulet)
+        return pickEvent(player);
+
+    // Don't draw the discard item one if they don't have items
+    if (randEvent.src === 'unseen_item_old' && !player.amulet && !player.scroll)
+        return pickEvent(player);
+
+    // Don't let the poisonous cloud actually kill a player
+    if (randEvent.src === 'cloud_meph_2' && player.health === 1)
+        return pickEvent(player);
+
+    // Don't fucks wit some events during sudden death
+    if (game.suddenDeath && (randEvent.src === 'necromutation_old' || randEvent.src === 'misc_lantern' || randEvent.src === 'rune_abyss' || randEvent.src === 'cloud_black_smoke'))
+        return pickEvent(player);
+
+    return randEvent;
+};
+
+const getRandomChallenge = () => {
+    const randomChallange = _.sample(['category', 'rhyme', 'sentence', 'trivia']);
+    return (randomChallange === game.lastChallenge) ? getRandomChallenge() : randomChallange;
+};
+
+const getPrompt = () => {
+    switch(game.challenge) {
+        case 'category':
+            game.triviaCategory = null;
+            return game.categories.pop();
+        case 'rhyme':
+            game.triviaCategory = null;
+            return game.rhymes.pop();
+        case 'trivia':
+            const questionObj = game.triviaQuestions.pop();
+            if (questionObj.question.trim() === '')
+                return getPrompt();
+
+            game.question = questionObj;
+            game.triviaCategory = questionObj.category.title;
+            game.triviaAnswer = questionObj.answer;
+            return questionObj.question;
+        default: // Sentence
+            return 'sentence';
+    }
+};
+
+const fetchTrivia = () => {
+    fetch('https://jservice.io/api/random?count=40').then(response => response.json()).then(response => {
+        game.triviaQuestions = response;
+    }).catch(reason => console.log(reason));
+}
+
 const resetGame = () => {
     game.host = null;
     game.players = [];
@@ -412,7 +512,19 @@ const endBattle = () => {
     game.challenge = null;
 };
 
-const getNextCharacter = i => {
+const getNextCharacter = (i, name = null) => {
+    switch(name) {
+        case 'FUCHIASS':
+            return 'fuchiass';
+        case 'OBI':
+            return 'obi';
+        case 'PLUMSON':
+        case 'PLUM':
+        case 'SKRIMPSON':
+            return 'plumson';
+        default:
+            break;
+    }
     const { players } = game;
     const index = (i > characters.length - 1) ? 0 : i;
     const nextCharacter = characters[index];

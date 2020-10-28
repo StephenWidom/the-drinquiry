@@ -10,7 +10,7 @@ const Prompt = props => {
             opacity: 0
         },
         delay: 2000,
-    })
+    });
     return <animated.div className='Prompt' style={styles}>
         <h3>{challenge}</h3>
         <img className='placeholder' src={require('../assets/error.png')} alt='' />
