@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSpring, animated } from 'react-spring';
+import LongPressable from 'react-longpressable';
 
 const Trivia = props => {
     const { triviaAnswer } = props;
@@ -17,11 +18,17 @@ const TriviaBack = props => {
             transform: 'rotateY(0deg)',
         }
     });
-    return <animated.div className='TriviaBack card' style={styles} onClick={() => socket.emit('revealAnswer')}>
-        <h3>Trivia</h3>
-        <h3 className='question'>{prompt}</h3>
-        <h3 className='category'>{triviaCategory}</h3>
-    </animated.div>;
+    return <LongPressable
+            onLongPress={() => socket.emit('newTriviaQuestion')}
+            onShortPress={() => socket.emit('revealAnswer')}
+            longPressTime={2000}
+        >
+        <animated.div className='TriviaBack card' style={styles}>
+            <h3>Trivia</h3>
+            <h3 className='question'>{prompt}</h3>
+            <h3 className='category'>{triviaCategory}</h3>
+        </animated.div>;
+    </LongPressable>
 };
 
 const TriviaFront = props => {

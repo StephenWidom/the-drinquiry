@@ -246,6 +246,13 @@ io.on('connection', socket => {
         const nextToGo = nextPlayer(game.battleTurn, game.players); 
         game.battleTurn = nextToGo.id;
         io.emit('updateBattle', true, game.battleTurn);
+
+        // If it's a trivia battle
+        if (game.triviaCategory) {
+            game.prompt = getPrompt();
+            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory);
+        }
+
     });
 
     socket.on('skipAttack', () => {
@@ -258,6 +265,12 @@ io.on('connection', socket => {
         const nextToGo = nextPlayer(game.battleTurn, game.players); 
         game.battleTurn = nextToGo.id;
         io.emit('updateBattle', true, game.battleTurn);
+
+        // If it's a trivia battle
+        if (game.triviaCategory) {
+            game.prompt = getPrompt();
+            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory);
+        }
     });
 
     socket.on('missAttack', () => {
@@ -293,7 +306,7 @@ io.on('connection', socket => {
         if (!game.battle)
             return;
 
-        game.triviaAnswer = game.question.answer;
+        game.triviaAnswer = game.question.answer.replace(/(<([^>]+)>)/gi, "");
         io.emit('revealAnswer', game.triviaAnswer);
     });
 
@@ -310,6 +323,13 @@ io.on('connection', socket => {
         const shuffledPlayers = _.shuffle(game.players);
         game.players = shuffledPlayers;
         io.emit('updatePlayers', game.players);
+    });
+
+    socket.on('newTriviaQuestion', () => {
+        if (game.triviaCategory) {
+            game.prompt = getPrompt();
+            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory);
+        }
     });
 
     socket.on('absoluteDisaster', () => {
@@ -475,7 +495,6 @@ const getPrompt = () => {
 
             game.question = questionObj;
             game.triviaCategory = questionObj.category.title;
-            game.triviaAnswer = questionObj.answer;
             return questionObj.question;
         default: // Sentence
             return 'sentence';
@@ -483,7 +502,7 @@ const getPrompt = () => {
 };
 
 const fetchTrivia = () => {
-    fetch('https://jservice.io/api/random?count=40').then(response => response.json()).then(response => {
+    fetch('https://jservice.io/api/random?count=10').then(response => response.json()).then(response => {
         game.triviaQuestions = response;
     }).catch(reason => console.log(reason));
 }
@@ -510,6 +529,8 @@ const endBattle = () => {
     game.prompt = null;
     game.lastChallenge = game.challenge;
     game.challenge = null;
+    game.triviaCategory = null;
+    game.triviaAnswer = null;
 };
 
 const getNextCharacter = (i, name = null) => {
