@@ -1,30 +1,26 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
 import Players from './Players';
 import Monster from './Monster';
 import Event from './Event';
+import Trivia from './Trivia';
 import CardContainer from './CardContainer';
-import Prompt from './Prompt';
-import BattleMessage from './BattleMessage';
 import { getActivePlayer } from '../utils';
 
 const Game = props => {
-    const { players, battle, prompt, active } = props;
-    const activePlayer = useRef(getActivePlayer(active, players));
-
-    useEffect(() => {
-        activePlayer.current = getActivePlayer(active, players);
-    }, [active, players]);
+    const { players, active, triviaCategory } = props;
+    const activePlayer = getActivePlayer(active, players);
 
     return <div className='Game'>
-        {activePlayer.current && <h2>{activePlayer.current.name}'s Turn</h2>}
+        {activePlayer && <h2>{activePlayer.name}'s Turn</h2>}
         <Players {...props} slim={true} />
         <CardContainer>
-            {!battle &&<Event {...props} />}
-            <Monster {...props} />
-            {battle && !!prompt && <Prompt {...props} />}
+            {triviaCategory
+                ? <Trivia {...props} player={activePlayer} />
+                : <Event {...props} player={activePlayer} host={true} />
+            }
+            <Monster {...props} player={activePlayer} />
         </CardContainer>
-        {battle && <BattleMessage {...props} />}
     </div>;
 };
 

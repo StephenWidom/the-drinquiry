@@ -7,11 +7,11 @@ module.exports = [
         code: `socket.emit('updateItem', player.id, 'amulet');`,
     },
     {
-        name: 'Tower Shield',
-        text: 'You gain a shield! If you fail an attack but the monster has 2 or fewer health, you survive.',
+        name: 'Magic Scroll',
+        text: 'You can use this scroll to reveal a different prompt!',
         modifier: 0,
-        src: 'large_shield_1_new',
-        code: `socket.emit('updateItem', player.id, 'shield');`,
+        src: 'scroll_yellow',
+        code: `socket.emit('updateItem', player.id, 'scroll');`,
     },
     {
         name: 'Stamina Potion',
@@ -31,7 +31,7 @@ module.exports = [
         name: 'Monster Strength',
         text: 'The next monster has +3 health',
         modifier: 3,
-        src: 'misc_deck_legendary_new',
+        src: 'misc_lantern',
         code: `socket.emit('updateModifier', 3);`,
     },
     {
@@ -61,5 +61,42 @@ module.exports = [
         modifier: 0,
         src: 'zot',
         code: `socket.emit('absoluteDisaster');`,
+    },
+    {
+        name: "King's Decree",
+        text: 'Make a rule',
+        modifier: 0,
+        src: 'shining_one',
+    },
+    {
+        name: 'Woopsie Daisey',
+        text: 'Lose your scroll and/or amulet',
+        modifier: 0,
+        src: 'unseen_item_old',
+        code: `socket.emit('loseItems', player.id);`,
+    },
+    {
+        name: 'SOCIAL',
+        text: 'Everyone drinks!',
+        modifier: 0,
+        src: 'blue_fountain',
+    },
+    {
+        name: 'Give 2',
+        text: 'Give two drinks to any one player',
+        modifier: 0,
+        src: 'control_undead_new',
+    },
+    {
+        name: 'Take 2',
+        text: 'Take two drinks to the dome-piece',
+        modifier: 0,
+        src: 'drink_two',
+    },
+    {
+        name: 'Inexorably Linked',
+        text: 'Choose a player. You must drink when they drink and vice versa.',
+        modifier: 0,
+        src: 'necromutation_old',
     },
 ];

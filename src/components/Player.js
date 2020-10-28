@@ -1,21 +1,26 @@
 import React from 'react';
+import { useSpring, animated } from 'react-spring';
 
 import Health from './Health';
 import Potions from './Potions';
 import Amulet from './Amulet';
-import Shield from './Shield';
+import Scroll from './Scroll';
 
 import { isBattling, isActive } from '../utils';
 
 const Player = props => {
-    const { player, socket, battleTurn, active, started } = props;
+    const { player, socket, battleTurn, active, started, slim } = props;
+    const styles = useSpring({
+        borderColor: isBattling(battleTurn, player) ? '#EC4C70' : isActive(active, player) ? '#413482' : '#8F6690',
+        height: isActive(active, player) ? 217 : slim ? 95 : 217,
+    });
 
     const changeCharacter = () => {
         if (!started)
             socket.emit('changeCharacter');
     }
 
-    return <div className={`Player 
+    return <animated.div style={styles} className={`Player 
             ${player.dead ? 'dead' : ''}
             ${isActive(active, player) ? 'active' : ''}
             ${isBattling(battleTurn, player) ? 'battling' : 'nah'}
@@ -27,8 +32,8 @@ const Player = props => {
         <Health player={player} socket={socket} />
         <Potions player={player} socket={socket} />
         <Amulet player={player} socket={socket} />
-        <Shield player={player} socket={socket} />
-    </div>;
+        <Scroll player={player} socket={socket} />
+    </animated.div>;
 };
 
 export default Player;

@@ -71,7 +71,8 @@ h2
         display: none
 
       .Amulet,
-      .Shield
+      .Shield,
+      .Scroll,
         top: 6px
 
         img
@@ -81,7 +82,8 @@ h2
       .Amulet
         left: 10px
 
-      .Shield
+      .Shield,
+      .Scroll,
         right: 10px
 
       .Health
@@ -99,7 +101,8 @@ h2
   border-radius: 4%
   border: 8px solid $blue
   text-align: center
-  background: $lightgray
+  background: $lightgray url('../assets/card_background.jpg') center center no-repeat
+  background-size: cover
   padding: 10px
   margin-bottom: 4%
   position: relative
@@ -175,7 +178,8 @@ h2
       color: $blue
 
   .Amulet,
-  .Shield
+  .Shield,
+  .Scroll,
     position: absolute
     top: 40px
     width: 32px
@@ -194,7 +198,8 @@ h2
     img
       transform: scaleX(-1)
 
-  .Shield
+  .Shield,
+  .Scroll
     right: 40px
     top: 36px
 
@@ -216,39 +221,18 @@ h2
 
 .Event,
 .Monster,
-.Prompt
-  background: $lightgray
-  width: 300px
-  border: 8px solid #fff
-  border-radius: 10px
-  padding: 30px 20px
+.Trivia
+  transition: all 0.2s ease
   position: relative
+  cursor: pointer
+  width: 300px
   height: 415px
 
-  &:before
-    z-index: -1
-    content: ''
-    position: absolute
-    top: -8px
-    left: -8px
-    right: -8px
-    bottom: -8px
-    transform: rotate(3deg)
-    border: 8px solid #fff
-    background: $lightgray
-    border-radius: 10px
-
-  transition: all 0.2s ease
-  cursor: pointer
-
   &:hover
-    transform: scale(1.1) rotate(-1deg)
+    transform: scale(1.15)
 
     .placeholder
       filter: grayscale(0%)
-
-    &:before
-      display: none
 
   &.clickme
     border: 8px solid $pink
@@ -318,7 +302,8 @@ h2
   p
     height: 55px
 
-.Prompt
+.Prompt,
+.Trivia
 
   .placeholder
     margin-bottom: 70px
@@ -332,6 +317,19 @@ h2
     height: auto
     left: 0
     right: 0
+
+.Trivia
+
+  .question
+    font-size: 20px
+    line-height: 1.4
+    font-family: 'Roboto', sans-serif
+    height: auto
+    text-align: center
+    text-shadow: none
+    background: #fff
+    padding: 10px 5px
+    border-radius: 4px
 
 .CardContainer
   display: flex
@@ -440,3 +438,68 @@ h2
   h1
     span
       font-family: 'Grenze Gotisch', cursive
+
+
+.FakeCard
+  z-index: -1
+  content: ''
+  position: absolute
+  top: -8px
+  left: -8px
+  right: -8px
+  bottom: -8px
+  transform: rotate(3deg)
+  border: 8px solid #fff
+  background: $lightgray
+  border-radius: 10px
+
+.card
+  background: $lightgray url('../assets/card_background.jpg') center center no-repeat
+  background-size: cover
+  border: 8px solid #fff
+  border-radius: 10px
+  height: 415px
+  padding: 30px 20px
+  width: 300px
+  position: absolute
+
+  &.back
+    background: $gray url('../assets/black_paper.png') center center no-repeat
+    background-size: cover
+
+.EventFront,
+.MonsterFront
+
+  z-index: 1
+
+.Prompt,
+.Trivia
+  
+  z-index: 2
+
+.EventBack,
+.MonsterBack
+  
+  h6
+    color: #fff
+    font-size: 33px
+
+.ScrollButton
+
+  border: 8px solid $purple
+  cursor: pointer
+  width: 110px
+  height: 110px
+  background: $gold5
+  border-radius: 4px
+
+  img
+    width: 96px
+    height: auto
+    transition: all 0.2s ease
+
+  &:hover
+
+    img
+      transform: scale(1.2)
+

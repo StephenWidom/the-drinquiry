@@ -4,7 +4,6 @@ import { Redirect } from 'react-router-dom';
 import Game from './Game';
 import Wait from './Wait';
 import Winner from './Winner';
-import Player from './Player';
 
 const Host = props => {
     const { host, started, winner } = props;

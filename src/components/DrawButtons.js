@@ -2,10 +2,10 @@ import React from 'react';
 import { Button } from '@blueprintjs/core';
 
 const DrawButtons = props => {
-    const { player, socket, event, monster, battle } = props;
+    const { player, socket, event, monster, battle, health } = props;
 
     const drawEvent = () => {
-        socket.emit('drawEvent', player.id);
+        socket.emit('drawEvent', player);
     }
 
     const drawMonster = () => {
@@ -14,7 +14,9 @@ const DrawButtons = props => {
 
     return <div className='DrawButtons'>
         {event && monster
-            ? <>{!battle && <h2>Click monster to battle!</h2>}</>
+            ? health
+                ? <>{!battle && <h2>Click monster to battle!</h2>}</>
+                : <h2>Caught him square! Noice!</h2>
             : <>
 
                 <Button
