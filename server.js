@@ -340,6 +340,14 @@ io.on('connection', socket => {
         io.emit('updatePlayers', players);
     });
 
+    socket.on('giveEveryoneScrolls', () => {
+        const { players } = game;
+        players.forEach(p => {
+            p.scroll = true;
+        });
+        io.emit('updatePlayers', players);
+    });
+
     socket.on('dodge', () => {
         endBattle();
         setTimeout(() => {

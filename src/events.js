@@ -94,6 +94,13 @@ module.exports = [
         src: 'drink_two',
     },
     {
+        name: 'Altar of Fairness',
+        text: 'Everybody gets a scroll!',
+        modifier: 0,
+        src: 'ru',
+        code: `socket.emit('giveEveryoneScrolls');`,
+    },
+    {
         name: 'Inexorably Linked',
         text: 'Choose a player. You must drink when they drink and vice versa.',
         modifier: 0,
