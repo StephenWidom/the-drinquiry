@@ -498,6 +498,9 @@ const getPrompt = () => {
             return game.rhymes.pop();
         case 'trivia':
             const questionObj = game.triviaQuestions.pop();
+            if (!questionObj)
+                return getPrompt();
+
             if (questionObj.question.trim() === '')
                 return getPrompt();
 
