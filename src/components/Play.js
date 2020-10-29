@@ -26,7 +26,7 @@ export default class Play extends PureComponent {
                 {disconnected
                     ? <Disconnected />
                     : winner
-                        ? <Winner {...this.props} />
+                        ? <Winner {...this.props} host={false} />
                         : <>
                         {me && <Player player={me} socket={socket} {...this.props} />}
                         {me && isActive(active, me)
