@@ -13,7 +13,7 @@ const Host = props => {
             {started
                 ? <Game {...props} />
                 : winner
-                    ? <Winner {...props} />
+                    ? <Winner {...props} host={true} />
                     : <Wait {...props} />
             }
         </div>

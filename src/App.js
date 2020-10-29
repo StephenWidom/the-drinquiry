@@ -45,7 +45,7 @@ class App extends PureComponent {
 
         this.socket.on('updateActivePlayer', id => this.setState({ active: id }));
 
-        this.socket.on('gameStarted', () => this.setState({ started: true }));
+        this.socket.on('gameStarted', started => this.setState({ started }));
 
         this.socket.on('goToLobby', () => this.props.history.push('/play'));
 

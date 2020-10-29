@@ -78,7 +78,7 @@ io.on('connection', socket => {
                     io.emit('updatePlayers', players);
                     socket.emit('goToLobby');
                     if (game.started)
-                        socket.emit('gameStarted');
+                        socket.emit('gameStarted', true);
                     return;
                 }
             }
@@ -140,7 +140,7 @@ io.on('connection', socket => {
 
         io.emit('updatePlayers', game.players);
         io.emit('updateActivePlayer', game.active);
-        io.emit('gameStarted');
+        io.emit('gameStarted', true);
     });
 
     socket.on('updateHealth', (id, modifier) => {
@@ -315,7 +315,7 @@ io.on('connection', socket => {
         io.emit('updateBattle', false, null);
         // Slight delay to peep the reward
         setTimeout(() => {
-            io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null);
+            io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null);
         }, 3800);
     });
 
@@ -348,11 +348,25 @@ io.on('connection', socket => {
         io.emit('updatePlayers', players);
     });
 
-    socket.on('dodge', () => {
+    socket.on('runItBack', () => {
+        // Soft reset
         endBattle();
-        setTimeout(() => {
-            io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null);
-        }, 2500);
+        game.started = false;
+        game.active = null;
+        game.prompt = null;
+        game.suddenDeath = false;
+        game.winner = null;
+        io.emit('updateGame', null, null, null, null, null, false, 0, null, null, null, null, null);
+        io.emit('gameWon', null);
+        const { players } = game;
+        players.forEach(p => {
+            p.scroll = true;
+            p.amulet = false;
+            p.health = 3;
+            p.potions = 0;
+            p.dead = false;
+        });
+        io.emit('updatePlayers', players);
     });
 
     socket.on('disconnect', () => {
