@@ -6,6 +6,7 @@ import Join from './components/Join';
 import Landing from './components/Landing';
 import Host from './components/Host';
 import Play from './components/Play';
+import BlackBackground from './components/BlackBackground';
 
 import './App.scss';
 
@@ -71,6 +72,7 @@ class App extends PureComponent {
 
     render() {
         return <div className='App'>
+            <BlackBackground {...this.state} />
             <Switch>
                 <Route path='/join'>
                     <Join {...this.state} socket={this.socket} />

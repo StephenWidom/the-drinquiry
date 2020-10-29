@@ -20,6 +20,7 @@ body
   background: $gray url('../assets/dungeon.jpg') center center no-repeat
   background-size: cover
   font-family: 'Roboto', sans-serif
+  position: relative
 
 .container
   width: 1200px
@@ -55,6 +56,7 @@ h2
 
   &.slim
     width: 300px
+    margin-top: -80px
     align-content: flex-start
 
     .Player:not(.active)
@@ -118,7 +120,9 @@ h2
 
   &.dead,
   &.disconnected
-    background: $gray
+
+    img
+      filter: grayscale(80%)
 
     &:after
       content: ''
@@ -510,3 +514,12 @@ h2
 
   h3
     color: #fff
+
+.BlackBackground
+
+  position: fixed
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  background: #000
