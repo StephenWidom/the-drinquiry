@@ -27,7 +27,7 @@ const Player = props => {
             ${player.connected ? '' : 'disconnected'}
             ${player.winner ? 'winner' : ''}
         `}>
-        <img className={`avatar ${started ? '' : 'allowchange'}`} src={require(`../assets/${player.character}.png`)} alt='' onClick={changeCharacter} />
+        <img className={`avatar ${started ? '' : 'allowchange'}`} src={require(`../assets/${player.character.class}.png`)} alt='' onClick={changeCharacter} />
         <h3>{player.name}</h3>
         <Health player={player} socket={socket} />
         <Potions player={player} socket={socket} />

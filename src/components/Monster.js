@@ -1,19 +1,52 @@
 import React, { PureComponent } from 'react';
+import _ from 'lodash';
+import ReactHowler from 'react-howler';
 import { useSpring, animated } from 'react-spring';
 
 export default class Monster extends PureComponent {
+    constructor(props) {
+        super(props);
+        this.state = {
+            playing: false,
+            monsterDeath: false,
+            roar: this.getRandomRoar(),
+            roarPlaying: false,
+        };
+    }
     componentDidUpdate(prevProps) {
-        const { player, monster, health, socket, host } = this.props;
+        const { player, monster, health, socket, host, battle } = this.props;
 
-        // Prevents these from running twice
-        if (!player || !monster || host)
-            return;
+        if (!prevProps.battle && battle && host)
+            this.setState({ playing: true });
 
-        if (prevProps.monster === null && monster)
-            socket.emit('initMonster', monster);
+        if (prevProps.battle && !battle && host)
+            this.setState({ playing: false });
 
-        if (prevProps.health && health === 0)
-            socket.emit('defeatMonster');
+        if (prevProps.health && health === 0) {
+            if (host) {
+                this.setState({ monsterDeath: true });
+            } else {
+                socket.emit('defeatMonster');
+            }
+        }
+
+        if (prevProps.monster === null && monster) {
+            if (host) {
+                this.setState({ roar: this.getRandomRoar(), roarPlaying: true });
+            } else {
+                socket.emit('initMonster', monster);
+            }
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.props.host)
+            this.setState({ playing: false });
+    }
+
+    getRandomRoar = () => {
+        const randInt = _.random(0, 3);
+        return `roar${randInt}.mp3`;
     }
 
     handleMonsterClick = () => {
@@ -30,8 +63,17 @@ export default class Monster extends PureComponent {
     }
 
     render() {
-        const { monster, health, battle } = this.props;
+        const { monster, health, battle, host } = this.props;
+        const { playing, monsterDeath, roar, roarPlaying } = this.state;
         return <div className='Monster' onClick={this.handleMonsterClick}>
+            {host && <>
+                <ReactHowler
+                    src={require(`../assets/audio/${roar}`)}
+                    playing={roarPlaying}
+                    volume={0.7}
+                    onEnd={() => this.setState({ roarPlaying: false })}
+                />
+            </>}
             <MonsterBack monster={monster} />
             {monster && <MonsterFront monster={monster} health={health} battle={battle} />}
         </div>;
