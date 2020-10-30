@@ -354,7 +354,8 @@ io.on('connection', socket => {
     socket.on('giveEveryoneScrolls', () => {
         const { players } = game;
         players.forEach(p => {
-            p.scroll = true;
+            if (!p.dead)
+                p.scroll = true;
         });
         io.emit('updatePlayers', players);
     });
@@ -376,6 +377,17 @@ io.on('connection', socket => {
             p.health = 3;
             p.potions = p.dead ? 2 : 1;
             p.dead = false;
+        });
+        io.emit('updatePlayers', players);
+    });
+
+    socket.on('reviveGhosts', () => {
+        const { players } = game;
+        players.forEach(p => {
+            if (p.dead) {
+                p.dead = false;
+                p.health = 1;
+            }
         });
         io.emit('updatePlayers', players);
     });
@@ -444,7 +456,7 @@ const getMonster = () => {
     if (game.suddenDeath) {
         return {
             name: 'Kratos on Acid',
-            health: 9,
+            health: 99,
             challenge: 'random',
             reward: 'none',
             src: 'kratos_on_acid',
@@ -457,8 +469,12 @@ const getMonster = () => {
 
 const takeDamage = player => {
     player.health--;
-    if (!player.health)
+    if (!player.health) {
         player.dead = true;
+        player.potions = 0;
+        player.scroll = false;
+        player.amulet = false;
+    }
 
     checkWinCondition();
 };
@@ -509,6 +525,10 @@ const pickEvent = player => {
 
     // Don't fucks wit some events during sudden death
     if (game.suddenDeath && (randEvent.src === 'necromutation_old' || randEvent.src === 'misc_lantern' || randEvent.src === 'rune_abyss' || randEvent.src === 'cloud_black_smoke'))
+        return pickEvent(player);
+
+    // Don't revive dead players if there are none
+    if (randEvent.src === 'gem_brass_new' && !game.players.some(p => p.dead))
         return pickEvent(player);
 
     return randEvent;

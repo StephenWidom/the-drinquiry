@@ -106,4 +106,11 @@ module.exports = [
         modifier: 0,
         src: 'necromutation_old',
     },
+    {
+        name: 'Ghost Revival',
+        text: 'All ghosts are back to life!',
+        modifier: 0,
+        src: 'gem_brass_new',
+        code: `socket.emit('reviveGhosts');`,
+    },
 ];
