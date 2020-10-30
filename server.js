@@ -55,7 +55,8 @@ io.on('connection', socket => {
                 return;
             }
             game.host = socket.id;
-            game.triviaQuestions = fetchTrivia();
+            game.triviaQuestions = [];
+            fetchTrivia();
             socket.emit('gameHosted');
         } else {
             if (!game.host) {
@@ -108,6 +109,7 @@ io.on('connection', socket => {
                 scroll: true,
             });
             io.emit('updatePlayers', players);
+            io.to(game.host).emit('playDoorSound');
             socket.emit('goToLobby');
         }
     });
@@ -122,10 +124,10 @@ io.on('connection', socket => {
                 'fuchiass',
                 'obi',
             ];
-            if (reservedNames.includes(thisPlayer.character))
+            if (reservedNames.includes(thisPlayer.character.class))
                 return console.log('nice name');
 
-            const index = characters.findIndex(c => c === thisPlayer.character);
+            const index = characters.findIndex(c => c.class === thisPlayer.character.class);
             thisPlayer.character = getNextCharacter(index);
             io.emit('updatePlayers', players);
         }
@@ -217,6 +219,7 @@ io.on('connection', socket => {
 
     socket.on('consumeScroll', () => {
         io.emit('updatePrompt', null, game.challenge, null);
+        io.to(game.host).emit('playScrollSound');
         setTimeout(() => {
             game.prompt = getPrompt(game.challenge);
             io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory);
@@ -238,6 +241,7 @@ io.on('connection', socket => {
         game.battle = true;
         game.battleTurn = game.active;
         io.emit('updateBattle', true, game.battleTurn);
+        io.to(game.host).emit('playBattleMusic');
         
     });
 
@@ -246,6 +250,7 @@ io.on('connection', socket => {
         if (game.health < 0)
             game.health = 0;
 
+        io.to(game.host).emit('playHitSound', game.battleTurn, game.players);
         io.emit('updateMonsterHealth', game.health);
         const nextToGo = nextPlayer(game.battleTurn, game.players); 
         game.battleTurn = nextToGo.id;
@@ -266,6 +271,7 @@ io.on('connection', socket => {
             thisPlayer.potions--;
             io.emit('updatePlayers', players);
         }
+        io.to(game.host).emit('playPotionSound');
         const nextToGo = nextPlayer(game.battleTurn, game.players); 
         game.battleTurn = nextToGo.id;
         io.emit('updateBattle', true, game.battleTurn);
@@ -280,6 +286,7 @@ io.on('connection', socket => {
     socket.on('missAttack', () => {
         const { players, battleTurn, health } = game;
         endBattle();
+        io.to(game.host).emit('playMissSound');
         io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null);
         const thisPlayer = players.find(p => p.id === battleTurn);
         if (!_.isNil(thisPlayer)) {
@@ -295,6 +302,7 @@ io.on('connection', socket => {
     socket.on('fuckedUp', id => {
         const { players, health } = game;
         endBattle();
+        io.to(game.host).emit('playMissSound');
         io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null);
         const thisPlayer = players.find(p => p.id === id);
         if (!_.isNil(thisPlayer)) {
@@ -317,6 +325,7 @@ io.on('connection', socket => {
     socket.on('defeatMonster', () => {
         endBattle();
         io.emit('updateBattle', false, null);
+        io.to(game.host).emit('playMonsterDeathSound');
 
         // Slight delay to peep the reward
         setTimeout(() => {
@@ -370,6 +379,7 @@ io.on('connection', socket => {
         game.winner = null;
         io.emit('updateGame', null, null, null, null, null, false, 0, null, null, null, null, null);
         io.emit('gameWon', null);
+        io.to(game.host).emit('playWaitMusic');
         const { players } = game;
         players.forEach(p => {
             p.scroll = true;
@@ -474,6 +484,7 @@ const takeDamage = player => {
         player.potions = 0;
         player.scroll = false;
         player.amulet = false;
+        io.to(game.host).emit('playerDeathSound', player);
     }
 
     checkWinCondition();
@@ -549,8 +560,10 @@ const getPrompt = () => {
             return game.rhymes.pop();
         case 'trivia':
             const questionObj = game.triviaQuestions.pop();
-            if (!questionObj)
+            if (!questionObj) {
+                fetchTrivia();
                 return getPrompt();
+            }
 
             if (questionObj.question.trim() === '')
                 return getPrompt();
@@ -564,7 +577,7 @@ const getPrompt = () => {
 };
 
 const fetchTrivia = () => {
-    fetch('https://jservice.io/api/random?count=10').then(response => response.json()).then(response => {
+    fetch('https://jservice.io/api/random?count=100').then(response => response.json()).then(response => {
         game.triviaQuestions = response;
     }).catch(reason => console.log(reason));
 }
@@ -598,18 +611,36 @@ const endBattle = () => {
 const getNextCharacter = (i, name = null) => {
     switch(name) {
         case 'FUCHIASS':
-            return 'fuchiass';
+            return {
+                class: 'fuchiass',
+                audio: {
+                    hit: 'punch',
+                    death: 'male_death',
+                }
+            };
         case 'OBI':
-            return 'obi';
+            return {
+                class: 'obi',
+                audio: {
+                    hit: 'bite',
+                    death: 'dog_death',
+                }
+            };
         case 'PLUMSON':
         case 'PLUM':
         case 'SKRIMPSON':
-            return 'plumson';
+            return {
+                class: 'plumson',
+                audio: {
+                    hit: 'cat',
+                    death: 'cat_death',
+                }
+            };
         default:
             break;
     }
     const { players } = game;
     const index = (i > characters.length - 1) ? 0 : i;
     const nextCharacter = characters[index];
-    return (players.some(p => p.character === nextCharacter)) ? getNextCharacter(i + 1) : nextCharacter;
+    return (players.some(p => p.character.class === nextCharacter.class)) ? getNextCharacter(i + 1) : nextCharacter;
 }

@@ -25,15 +25,14 @@ const Winner = props => {
         {Array.isArray(winner) // Unlikely
             ? <>
                 <h1>{winner[0].name} and {winner[1].name} <span>win!!</span></h1>
-                <animated.img style={styles} src={require(`../assets/${winner[0].character}.png`)} alt='' />
-                <animated.img style={styles} src={require(`../assets/${winner[1].character}.png`)} alt='' />
+                <animated.img style={styles} src={require(`../assets/${winner[0].character.class}.png`)} alt='' />
+                <animated.img style={styles} src={require(`../assets/${winner[1].character.class}.png`)} alt='' />
             </>
             : <>
                 <h1>{winner.name} <span>wins!</span></h1>
-                <animated.img style={styles} src={require(`../assets/${winner.character}.png`)} alt='' />
+                <animated.img style={styles} src={require(`../assets/${winner.character.class}.png`)} alt='' />
             </>
         }
-
         {host && <RestartButton {...props} />}
     </div>;
 };
