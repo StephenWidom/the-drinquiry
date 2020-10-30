@@ -97,7 +97,7 @@ io.on('connection', socket => {
                 name,
                 id: socket.id,
                 health: 3,
-                potions: 0,
+                potions: 1,
                 connected: true,
                 character: getNextCharacter(_.random(characters.length - 1), name),
                 dead: false,
@@ -202,7 +202,11 @@ io.on('connection', socket => {
     });
 
     socket.on('initMonster', monster => {
-        game.health = monster.health + game.modifier;
+        if (!game.suddenDeath) {
+            game.health = monster.health + game.modifier;
+        } else {
+            game.health = (game.health === null) ? monster.health : game.health;
+        }
         io.emit('updateMonsterHealth', game.health);
 
         game.challenge = (monster.challenge === 'random') ? getRandomChallenge() : monster.challenge;
@@ -275,6 +279,8 @@ io.on('connection', socket => {
 
     socket.on('missAttack', () => {
         const { players, battleTurn, health } = game;
+        endBattle();
+        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null);
         const thisPlayer = players.find(p => p.id === battleTurn);
         if (!_.isNil(thisPlayer)) {
             if (!thisPlayer.shield || health > 2) {
@@ -283,13 +289,13 @@ io.on('connection', socket => {
                 io.emit('updatePlayers', players);
             }
         }
-        endBattle();
-        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null);
     });
 
     // Player accidentally pressed hit but had an invalid attack
     socket.on('fuckedUp', id => {
         const { players, health } = game;
+        endBattle();
+        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null);
         const thisPlayer = players.find(p => p.id === id);
         if (!_.isNil(thisPlayer)) {
             if (!thisPlayer.shield || health > 1) { // Health must be 1 because one was subtracted by accidental hit
@@ -298,8 +304,6 @@ io.on('connection', socket => {
                 io.emit('updatePlayers', players);
             }
         }
-        endBattle();
-        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null);
     });
 
     socket.on('revealAnswer', () => {
@@ -313,9 +317,16 @@ io.on('connection', socket => {
     socket.on('defeatMonster', () => {
         endBattle();
         io.emit('updateBattle', false, null);
+
         // Slight delay to peep the reward
         setTimeout(() => {
             io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null);
+            if (game.suddenDeath) {
+                const { players } = game;
+                let winners = players.filter(p => !p.dead && p.connected);
+                io.emit('gameStarted', false);
+                io.emit('gameWon', winners);
+            };
         }, 3800);
     });
 
@@ -363,7 +374,7 @@ io.on('connection', socket => {
             p.scroll = true;
             p.amulet = false;
             p.health = 3;
-            p.potions = 0;
+            p.potions = p.dead ? 2 : 1;
             p.dead = false;
         });
         io.emit('updatePlayers', players);
@@ -433,7 +444,7 @@ const getMonster = () => {
     if (game.suddenDeath) {
         return {
             name: 'Kratos on Acid',
-            health: 99,
+            health: 9,
             challenge: 'random',
             reward: 'none',
             src: 'kratos_on_acid',
@@ -459,6 +470,12 @@ const checkWinCondition = () => {
     // If no one is alive
     if (alivePlayers.length === 0) {
         // No one wins
+        game.started = false;
+        game.winner = {
+            name: 'NOBODY',
+            character: 'kratos_on_acid',
+        };
+        io.emit('gameWon', game.winner);
     } else if (alivePlayers.length === 1) {
         // We have a winner!
         game.started = false;
@@ -544,7 +561,7 @@ const resetGame = () => {
 };
 
 const endBattle = () => {
-    game.health = null;
+    game.health = (game.monster && game.monster.src) === 'kratos_on_acid' ? game.health : null;
     game.event = null;
     game.monster = null;
     game.active = nextPlayerId(game.active, game.players);
