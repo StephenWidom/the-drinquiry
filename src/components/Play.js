@@ -43,16 +43,22 @@ export default class Play extends PureComponent {
                                         : <Event {...this.props} player={me} host={false} />
                                     }
                                     {prompt && me.scroll && !battle && prompt !== 'sentence' && !!health && <ScrollButton {...this.props} />}
-                                    <Monster {...this.props} player={me} />
+                                    <Monster {...this.props} player={me} host={false} />
                                 </CardContainer>
                                 <MobileCardContainer>
-                                    {!battle && event && !monster && !prompt && <Event {...this.props} player={me} />}
+                                    {!battle && event && !monster && !prompt && <Event {...this.props} player={me} host={false} />}
                                     {monster && !battle && <Monster {...this.props} player={me} host={false} />}
+                                    {monster && battle && prompt && <Event {...this.props} player={me} host={false} />}
+                                    {triviaCategory && (isBattling(battleTurn, me)
+                                            ? <Trivia {...this.props} player={me} host={false} />
+                                            : battle && <BlankCard {...this.props} />)
+                                    }
                                 </MobileCardContainer>
                             </>
                             : battle // Not active player, show cards, but don't run code
                                 ? <>
                                     <BattleInterface player={me} {...this.props} />
+                                    {prompt && me.scroll && !battle && prompt !== 'sentence' && !!health && <ScrollButton {...this.props} />}
                                     <CardContainer>
                                         {me && isBattling(battleTurn, me) && triviaCategory && <Trivia {...this.props} player={me} />}
                                         {me && !isBattling(battleTurn, me) && triviaCategory && <BlankCard {...this.props} />}
