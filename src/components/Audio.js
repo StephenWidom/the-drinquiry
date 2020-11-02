@@ -9,7 +9,7 @@ export default class Audio extends PureComponent {
         super(props);
 
         this.state = {
-            isMuted: false,
+            volume: 1,
             waitMusic: true,
             doorSound: false,
             hitSound: null,
@@ -24,6 +24,7 @@ export default class Audio extends PureComponent {
             playerDeathSoundPlaying: false,
             cheer: false,
         };
+        this.volumes = [0, 1, 0.5];
     }
 
     componentDidMount() {
@@ -53,22 +54,21 @@ export default class Audio extends PureComponent {
     }
 
     updateVolume = () => {
-        this.setState(prevState => {
-            return {
-                isMuted: !prevState.isMuted,
-            }
-        }, () => {
-            window.Howler.mute(this.state.isMuted);
+        let newVolumeIndex = this.state.volume + 1;
+        if (newVolumeIndex > this.volumes.length - 1)
+            newVolumeIndex = 0;
+        this.setState({ volume: newVolumeIndex }, () => {
+            window.Howler.volume(this.volumes[this.state.volume]);
         });
     };
 
     render() {
-        const { isMuted, waitMusic, doorSound, hitSound, hitSoundPlaying, potionSound, missSound, scrollSound, battleStart, battleMusic, monsterDeathSound, cheer, playerDeathSound, playerDeathSoundPlaying } = this.state;
+        const { volume, waitMusic, doorSound, hitSound, hitSoundPlaying, potionSound, missSound, scrollSound, battleStart, battleMusic, monsterDeathSound, cheer, playerDeathSound, playerDeathSoundPlaying } = this.state;
         const { monster, battle } = this.props;
         return <div className='Audio'>
             <Icon
                 onClick={this.updateVolume}
-                icon={isMuted ? 'volume-off' : 'volume-up'}
+                icon={volume === 1 ? 'volume-up' : volume === 2 ? 'volume-down' : 'volume-off'}
                 iconSize={30}
             />
             <ReactHowler
