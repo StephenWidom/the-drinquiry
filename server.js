@@ -263,13 +263,14 @@ io.on('connection', socket => {
         if (game.triviaCategory || game.challenge === 'roker') {
             game.prompt = getPrompt();
             io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, game.city);
+            io.emit('revealAnswer', null);
         }
 
     });
 
     socket.on('skipAttack', () => {
         const { players } = game;
-        const thisPlayer =  players.find(p => p.id === game.active);
+        const thisPlayer =  players.find(p => p.id === game.battleTurn);
         if (!_.isNil(thisPlayer)) {
             thisPlayer.potions--;
             io.emit('updatePlayers', players);
@@ -280,9 +281,10 @@ io.on('connection', socket => {
         io.emit('updateBattle', true, game.battleTurn);
 
         // If it's a trivia battle
-        if (game.triviaCategory || game.challege === 'roker') {
+        if (game.triviaCategory || game.challenge === 'roker') {
             game.prompt = getPrompt();
             io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, game.city);
+            io.emit('revealAnswer', null);
         }
     });
 
@@ -617,7 +619,6 @@ const fetchWeather = city => {
         game.weather = response;
         game.city.conditions = response.weather[0].description;
         io.emit('updateCity', game.city);
-        console.log(game.city);
     }).catch(reason => console.log(reason));
 }
 
