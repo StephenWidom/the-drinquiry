@@ -1,19 +1,32 @@
-import React, { useEffect } from 'react';
+import React, { PureComponent } from 'react';
 import { useSpring, animated } from 'react-spring';
 
-const Timer = props => {
-    useEffect(() => {
-        const { socket, host } = props;
-        const missTimer = setTimeout(() => {
+export default class Timer extends PureComponent {
+    componentDidMount() {
+        console.log('TIMER MOUNTED');
+        const { socket, host } = this.props;
+        this.missTimer = setTimeout(() => {
             if (!host)
                 socket.emit('missAttack');
         }, 37000);
+    }
 
-        return () => {
-            clearTimeout(missTimer);
-        }
-    }, []);
+    componentWillUnmount() {
+        clearTimeout(this.missTimer);
+    }
 
+    render() {
+        return <div className='Timer'>
+            <Top />
+            <Left />
+            <Bottom />
+            <Right />
+        </div>;
+    }
+
+};
+
+const Top = React.memo(props => {
     const topStyles = useSpring({
         width: 0,
         from: {
@@ -23,7 +36,10 @@ const Timer = props => {
             duration: 10000,
         }
     });
+    return <animated.div className='top' style={topStyles}></animated.div>;
+});
 
+const Left = React.memo(props => {
     const leftStyles = useSpring({
         height: 0,
         from: {
@@ -34,7 +50,10 @@ const Timer = props => {
         },
         delay: 10000,
     });
+    return <animated.div className='left' style={leftStyles}></animated.div>;
+});
 
+const Bottom = React.memo(props => {
     const bottomStyles = useSpring({
         width: 0,
         from: {
@@ -45,7 +64,10 @@ const Timer = props => {
         },
         delay: 18000,
     });
+    return <animated.div className='bottom' style={bottomStyles}></animated.div>;
+});
 
+const Right = React.memo(props => {
     const rightStyles = useSpring({
         height: 0,
         from: {
@@ -56,13 +78,5 @@ const Timer = props => {
         },
         delay: 28000,
     });
-
-    return <div className='Timer'>
-        <animated.div className='top' style={topStyles}></animated.div>
-        <animated.div className='left' style={leftStyles}></animated.div>
-        <animated.div className='bottom' style={bottomStyles}></animated.div>
-        <animated.div className='right'style={rightStyles}></animated.div>
-    </div>;
-};
-
-export default Timer;
+    return <animated.div className='right'style={rightStyles}></animated.div>;
+});
