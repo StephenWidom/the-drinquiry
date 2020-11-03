@@ -25,7 +25,6 @@ const RokerBack = props => {
             socket.emit('revealTemperature');
     }
     return <LongPressable
-            onLongPress={() => socket.emit('newRoker')}
             onShortPress={revealTemperature}
             longPressTime={2000}
         >

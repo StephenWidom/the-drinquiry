@@ -14,6 +14,7 @@ import Disconnected from './Disconnected';
 import ScrollButton from './ScrollButton';
 import BlankCard from './BlankCard';
 import Winner from './Winner';
+import Instructions from './Instructions';
 import { isInGame, getPlayer, isActive, isBattling } from '../utils';
 
 export default class Play extends PureComponent {
@@ -40,9 +41,11 @@ export default class Play extends PureComponent {
                                     {triviaCategory
                                         ? isBattling(battleTurn, me) || battleTurn === null
                                             ? <Trivia {...this.props} player={me} />
-                                            : <BlankCard {...this.props} />
+                                            : <BlankCard />
                                         : city
-                                            ? <Roker player={me} host={false} {...this.props} />
+                                            ? isBattling(battleTurn, me) || battleTurn === null
+                                                ? <Roker player={me} host={false} {...this.props} />
+                                                : <BlankCard />
                                             : <Event {...this.props} player={me} host={false} />
                                     }
                                     {prompt && me.scroll && !battle && prompt === 'category' && !!health && <ScrollButton {...this.props} />}
@@ -55,9 +58,12 @@ export default class Play extends PureComponent {
                                     {monster && battle && prompt && <Event {...this.props} player={me} host={false} />}
                                     {triviaCategory && (isBattling(battleTurn, me)
                                             ? <Trivia {...this.props} player={me} host={false} />
-                                            : battle && <BlankCard {...this.props} />)
+                                            : battle && <BlankCard />)
                                     }
-                                    {city && battle && <Roker {...this.props} host={false} player={me} />}
+                                    {city && (isBattling(battleTurn, me)
+                                            ? <Roker {...this.props} host={false} player={me} />
+                                            : battle && <BlankCard />)
+                                    }
                                 </MobileCardContainer>
                             </>
                             : battle // Not active player, show cards, but don't run code
@@ -67,9 +73,11 @@ export default class Play extends PureComponent {
                                         {triviaCategory
                                             ? isBattling(battleTurn, me) || battleTurn === null
                                                 ? <Trivia {...this.props} player={me} />
-                                                : <BlankCard {...this.props} />
+                                                : <BlankCard />
                                             : city
-                                                ? <Roker player={me} host={false} {...this.props} />
+                                                ? isBattling(battleTurn, me) || battleTurn === null
+                                                    ? <Roker player={me} host={false} {...this.props} />
+                                                    : <BlankCard />
                                                 : <Event {...this.props} player={me} host={false} />
                                         }
                                         {prompt && me.scroll && !battle && prompt === 'category' && !!health && <ScrollButton {...this.props} />}
@@ -82,14 +90,17 @@ export default class Play extends PureComponent {
                                         {monster && battle && prompt && <Event {...this.props} player={me} host={false} />}
                                         {triviaCategory && (isBattling(battleTurn, me)
                                                 ? <Trivia {...this.props} player={me} host={false} />
-                                                : battle && <BlankCard {...this.props} />)
+                                                : battle && <BlankCard />)
                                         }
-                                        {city && <Roker {...this.props} host={false} player={me} />}
+                                        {city && (isBattling(battleTurn, me)
+                                                ? <Roker {...this.props} host={false} player={me} />
+                                                : battle && <BlankCard />)
+                                        }
                                     </MobileCardContainer>
                                 </>
                                 : started
                                     ? <h2>Awaiting the battle...</h2>
-                                    : <h2>Waiting for the game to begin</h2>
+                                    : <Instructions />
                         }
                     </>
                 }

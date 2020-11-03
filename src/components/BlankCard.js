@@ -5,7 +5,7 @@ const BlankCard = props => {
         <div className='card back'>
             <h3>The DRINQUIRY</h3>
             <img src={require('../assets/chain_mail_3.png')} alt='' className='placeholder' />
-            <h3>Awaiting Trivia</h3>
+            <h3>Awaiting Turn</h3>
         </div>
     </div>
 };
