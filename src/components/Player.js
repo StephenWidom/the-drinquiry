@@ -5,11 +5,12 @@ import Health from './Health';
 import Potions from './Potions';
 import Amulet from './Amulet';
 import Scroll from './Scroll';
+import Timer from './Timer';
 
 import { isBattling, isActive } from '../utils';
 
 const Player = props => {
-    const { player, socket, battleTurn, active, started, slim } = props;
+    const { player, socket, battleTurn, active, started, slim, battle } = props;
     const styles = useSpring({
         borderColor: isBattling(battleTurn, player) ? '#EC4C70' : isActive(active, player) ? '#413482' : '#8F6690',
         height: isActive(active, player) ? 217 : slim ? 95 : 217,
@@ -33,6 +34,7 @@ const Player = props => {
         <Potions player={player} socket={socket} />
         <Amulet player={player} socket={socket} />
         <Scroll player={player} socket={socket} />
+        {!slim && battle && isBattling(battleTurn, player) && <Timer {...props} socket={socket} host={slim} />}
     </animated.div>;
 };
 

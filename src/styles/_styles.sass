@@ -53,6 +53,7 @@ h2
   display: flex
   justify-content: space-between
   flex-wrap: wrap
+  position: relative
 
   &.slim
     width: 300px
@@ -63,6 +64,7 @@ h2
       padding-top: 15px
       border: 4px solid $purple
       height: 95px
+      transition: height 0.2s ease
 
       h3
         font-size: 19px
@@ -71,6 +73,12 @@ h2
       .avatar,
       .Potions
         display: none
+
+      &:hover
+        height: 125px !important
+
+        .Potions
+          display: block
 
       .Amulet,
       .Shield,
@@ -543,3 +551,35 @@ h2
   color: #fff
   cursor: pointer
 
+.Timer
+
+  >div
+    position: absolute
+    background: $lightgray
+
+  .top,
+  .bottom
+    width: 260px
+    height: 8px
+
+  .left,
+  .right
+    width: 8px
+    height: 217px
+
+  .top
+    top: -8px
+    left: -8px
+
+  .left
+    left: -8px
+    bottom: -8px
+
+  .bottom
+    bottom: -8px
+    right: -8px
+    order-bottom-right-radius: 8px
+
+  .right
+    right: -8px
+    top: -8px
