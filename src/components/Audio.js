@@ -14,6 +14,9 @@ export default class Audio extends PureComponent {
             doorSound: false,
             hitSound: null,
             hitSoundPlaying: false,
+            chainsSound: false,
+            dungeonDoor: false,
+            drawSound: false,
             potionSound: false,
             missSound: false,
             scrollSound: false,
@@ -29,7 +32,7 @@ export default class Audio extends PureComponent {
 
     componentDidMount() {
         const { socket } = this.props;
-        socket.on('playWaitMusic', () => this.setState({ waitMusic: true }));
+        socket.on('playWaitMusic', () => this.setState({ waitMusic: true, cheer: false }));
         socket.on('playDoorSound', () => this.setState({ doorSound: true }));
         socket.on('playHitSound', (id, players) => {
             const battlingPlayer = getBattlingPlayer(id, players);
@@ -40,6 +43,8 @@ export default class Audio extends PureComponent {
         socket.on('playScrollSound', () => this.setState({ scrollSound: true }));
         socket.on('playBattleMusic', () => this.setState({ battleStart: true, battleMusic: true, waitMusic: false }));
         socket.on('playMonsterDeathSound', () => this.setState({ monsterDeathSound: true }));
+        socket.on('playDrawSound', () => this.setState({ drawSound: true }));
+        socket.on('playStartSound', () => this.setState({ chainsSound: true, dungeonDoor: true }));
         socket.on('playerDeathSound', player => this.setState({ playerDeathSound: require(`../assets/audio/${player.character.audio.death}.mp3`), playerDeathSoundPlaying: true }));
         socket.on('gameWon', winner => {
             if (winner !== null)
@@ -63,7 +68,7 @@ export default class Audio extends PureComponent {
     };
 
     render() {
-        const { volume, waitMusic, doorSound, hitSound, hitSoundPlaying, potionSound, missSound, scrollSound, battleStart, battleMusic, monsterDeathSound, cheer, playerDeathSound, playerDeathSoundPlaying } = this.state;
+        const { volume, waitMusic, doorSound, drawSound, chainsSound, dungeonDoor, hitSound, hitSoundPlaying, potionSound, missSound, scrollSound, battleStart, battleMusic, monsterDeathSound, cheer, playerDeathSound, playerDeathSoundPlaying } = this.state;
         const { monster, battle } = this.props;
         return <div className='Audio'>
             <Icon
@@ -82,6 +87,24 @@ export default class Audio extends PureComponent {
                 volume={0.8}
                 playing={doorSound}
                 onEnd={() => this.setState({ doorSound: false })}
+            />
+            <ReactHowler
+                src={require('../assets/audio/chains.mp3')}
+                volume={0.8}
+                playing={chainsSound}
+                onEnd={() => this.setState({ chainsSound: false })}
+            />
+            <ReactHowler
+                src={require('../assets/audio/dungeondoor.mp3')}
+                volume={0.8}
+                playing={dungeonDoor}
+                onEnd={() => this.setState({ dungeonDoor: false })}
+            />
+            <ReactHowler
+                src={require('../assets/audio/draw.mp3')}
+                volume={0.9}
+                playing={drawSound}
+                onEnd={() => this.setState({ drawSound: false })}
             />
             {battle && hitSound &&
             <ReactHowler
@@ -139,7 +162,12 @@ export default class Audio extends PureComponent {
                 src={require('../assets/audio/victory.mp3')}
                 playing={cheer}
                 volume={0.5}
-                onEnd={() => this.setState({ cheer: false })}
+            />
+            <ReactHowler
+                src={require('../assets/audio/victorymusic.mp3')}
+                playing={cheer}
+                loop={true}
+                volume={0.4}
             />
         </div>;
     }
