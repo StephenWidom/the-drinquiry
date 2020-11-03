@@ -45,11 +45,11 @@ export default class Play extends PureComponent {
                                             ? <Roker player={me} host={false} {...this.props} />
                                             : <Event {...this.props} player={me} host={false} />
                                     }
-                                    {prompt && me.scroll && !battle && prompt !== 'sentence' && !!health && <ScrollButton {...this.props} />}
+                                    {prompt && me.scroll && !battle && prompt === 'category' && !!health && <ScrollButton {...this.props} />}
                                     <Monster {...this.props} player={me} host={false} />
                                 </CardContainer>
                                 <MobileCardContainer>
-                                    {prompt && me.scroll && !battle && prompt !== 'sentence' && !!health && <ScrollButton {...this.props} />}
+                                    {prompt && me.scroll && !battle && prompt === 'category' && !!health && <ScrollButton {...this.props} />}
                                     {!battle && event && !monster && !prompt && <Event {...this.props} player={me} host={false} />}
                                     {monster && !battle && <Monster {...this.props} player={me} host={false} />}
                                     {monster && battle && prompt && <Event {...this.props} player={me} host={false} />}
@@ -72,11 +72,11 @@ export default class Play extends PureComponent {
                                                 ? <Roker player={me} host={false} {...this.props} />
                                                 : <Event {...this.props} player={me} host={false} />
                                         }
-                                        {prompt && me.scroll && !battle && prompt !== 'sentence' && !!health && <ScrollButton {...this.props} />}
+                                        {prompt && me.scroll && !battle && prompt === 'category' && !!health && <ScrollButton {...this.props} />}
                                         <Monster {...this.props} player={me} host={false} />
                                     </CardContainer>
                                     <MobileCardContainer>
-                                        {prompt && me.scroll && !battle && prompt !== 'sentence' && !!health && <ScrollButton {...this.props} />}
+                                        {prompt && me.scroll && !battle && prompt === 'category' && !!health && <ScrollButton {...this.props} />}
                                         {!battle && event && !monster && !prompt && <Event {...this.props} player={me} host={false} />}
                                         {monster && !battle && <Monster {...this.props} player={me} host={false} />}
                                         {monster && battle && prompt && <Event {...this.props} player={me} host={false} />}

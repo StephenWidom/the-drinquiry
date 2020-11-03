@@ -217,7 +217,8 @@ io.on('connection', socket => {
         game.challenge = (monster.challenge === 'random') ? getRandomChallenge() : monster.challenge;
 
         game.prompt = getPrompt();
-        io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, game.city);
+        if (game.challenge !== 'roker') // Already updating prompt in fetchWeather
+            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, game.city);
     });
 
     socket.on('consumeScroll', () => {
@@ -262,8 +263,9 @@ io.on('connection', socket => {
         // If it's a trivia battle
         if (game.triviaCategory || game.challenge === 'roker') {
             game.prompt = getPrompt();
-            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, game.city);
-            io.emit('revealAnswer', null);
+
+            if (game.challenge !== 'roker')
+                io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, game.city);
         }
 
     });
@@ -283,8 +285,9 @@ io.on('connection', socket => {
         // If it's a trivia battle
         if (game.triviaCategory || game.challenge === 'roker') {
             game.prompt = getPrompt();
-            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, game.city);
-            io.emit('revealAnswer', null);
+
+            if (game.challenge !== 'roker')
+                io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, game.city);
         }
     });
 
@@ -550,6 +553,10 @@ const pickEvent = player => {
     if (randEvent.src === 'cloud_meph_2' && player.health === 1)
         return pickEvent(player);
 
+    // Don't give everyone scrolls if they've all got one
+    if (randEvent.src === 'ru' && game.players.every(p => p.scroll))
+        return pickEvent(player);
+
     // Don't fucks wit some events during sudden death
     if (game.suddenDeath && (randEvent.src === 'necromutation_old' || randEvent.src === 'misc_lantern' || randEvent.src === 'rune_abyss' || randEvent.src === 'cloud_black_smoke'))
         return pickEvent(player);
@@ -618,7 +625,7 @@ const fetchWeather = city => {
     fetch(`https://api.openweathermap.org/data/2.5/weather?id=${city.id}&units=imperial&APPID=${apiKey}`).then(response => response.json()).then(response => {
         game.weather = response;
         game.city.conditions = response.weather[0].description;
-        io.emit('updateCity', game.city);
+        io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, game.city);
     }).catch(reason => console.log(reason));
 }
 

@@ -2,12 +2,13 @@ import React, { useEffect } from 'react';
 import { useSpring, animated } from 'react-spring';
 
 const Timer = props => {
+    console.log('Timer mounted');
     useEffect(() => {
         const { socket, host } = props;
         const missTimer = setTimeout(() => {
             if (!host)
                 socket.emit('missAttack');
-        }, 36000);
+        }, 37000);
 
         return () => {
             clearTimeout(missTimer);
