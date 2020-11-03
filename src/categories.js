@@ -3,6 +3,7 @@ module.exports = [
     "Movies featuring Steve Buscemi",
     "Movies featuring Halle Berry",
     "Movies featuring Bill Murray",
+    "Movies featuring Adam Sandler",
     "State capitals",
     "African countries",
     "Brands of beer",

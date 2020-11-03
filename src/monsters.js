@@ -1,14 +1,14 @@
 module.exports = [
     {
         name: 'Treant',
-        health: 10,
+        health: 13,
         challenge: 'category',
         reward: 'none',
         src: 'treant',
     },
     {
         name: 'Abomination',
-        health: 15,
+        health: 19,
         challenge: 'category',
         reward: '+1 life',
         src: 'abomination_large_2',
@@ -16,14 +16,14 @@ module.exports = [
     },
     {
         name: 'Draconic',
-        health: 18,
+        health: 23,
         challenge: 'category',
         reward: 'make a rule',
         src: 'draconic_base-black_new',
     },
     {
         name: 'Efreet',
-        health: 10,
+        health: 12,
         challenge: 'sentence',
         reward: 'none',
         src: 'efreet',
@@ -109,5 +109,17 @@ module.exports = [
         reward: '+1 potion',
         src: 'ugly_thing',
         code: `socket.emit('updatePotions', player.id, 1);`,
+    },
+    {
+        name: 'Birdy Boi',
+        health: 4,
+        challenge: 'roker',
+        src: 'birdy',
+    },
+    {
+        name: 'Crabby Boi',
+        health: 6,
+        challenge: 'roker',
+        src: 'crab',
     },
 ];

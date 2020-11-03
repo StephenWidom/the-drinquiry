@@ -13,6 +13,7 @@ const options = {
     cert: fs.readFileSync(process.env.REACT_APP_CERT)
 };
 
+const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
 const app = express();
 const server = https.createServer(options, app);
 const io = socketIO(server);
@@ -36,8 +37,10 @@ const game = {
     modifier: 0,
     health: null,
     prompt: null,
+    city: null,
     rhymes: _.shuffle(require('./src/rhymes')),
     categories:  _.shuffle(require('./src/categories')),
+    cities: _.shuffle(require('./src/cities')),
     challenge: null,
     lastChallenge: null,
     suddenDeath: false,
@@ -214,15 +217,15 @@ io.on('connection', socket => {
         game.challenge = (monster.challenge === 'random') ? getRandomChallenge() : monster.challenge;
 
         game.prompt = getPrompt();
-        io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory);
+        io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, game.city);
     });
 
     socket.on('consumeScroll', () => {
-        io.emit('updatePrompt', null, game.challenge, null);
+        io.emit('updatePrompt', null, game.challenge, null, null);
         io.to(game.host).emit('playScrollSound');
         setTimeout(() => {
             game.prompt = getPrompt(game.challenge);
-            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory);
+            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, game.city);
             
             const { players } = game;
             const thisPlayer = players.find(p => p.id === game.active);
@@ -257,9 +260,9 @@ io.on('connection', socket => {
         io.emit('updateBattle', true, game.battleTurn);
 
         // If it's a trivia battle
-        if (game.triviaCategory) {
+        if (game.triviaCategory || game.challenge === 'roker') {
             game.prompt = getPrompt();
-            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory);
+            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, game.city);
         }
 
     });
@@ -277,9 +280,9 @@ io.on('connection', socket => {
         io.emit('updateBattle', true, game.battleTurn);
 
         // If it's a trivia battle
-        if (game.triviaCategory) {
+        if (game.triviaCategory || game.challege === 'roker') {
             game.prompt = getPrompt();
-            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory);
+            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, game.city);
         }
     });
 
@@ -287,7 +290,7 @@ io.on('connection', socket => {
         const { players, battleTurn, health } = game;
         endBattle();
         io.to(game.host).emit('playMissSound');
-        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null);
+        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null, null);
         const thisPlayer = players.find(p => p.id === battleTurn);
         if (!_.isNil(thisPlayer)) {
             if (!thisPlayer.shield || health > 2) {
@@ -303,7 +306,7 @@ io.on('connection', socket => {
         const { players, health } = game;
         endBattle();
         io.to(game.host).emit('playMissSound');
-        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null);
+        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null, null);
         const thisPlayer = players.find(p => p.id === id);
         if (!_.isNil(thisPlayer)) {
             if (!thisPlayer.shield || health > 1) { // Health must be 1 because one was subtracted by accidental hit
@@ -322,6 +325,15 @@ io.on('connection', socket => {
         io.emit('revealAnswer', game.triviaAnswer);
     });
 
+    socket.on('revealTemperature', () => {
+        const { weather } = game;
+        if (_.isNil(weather))
+            return false;
+
+        game.temperature = weather.main.temp;
+        io.emit('setTemp', game.temperature);
+    });
+
     socket.on('defeatMonster', () => {
         endBattle();
         io.emit('updateBattle', false, null);
@@ -329,7 +341,7 @@ io.on('connection', socket => {
 
         // Slight delay to peep the reward
         setTimeout(() => {
-            io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null);
+            io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null, null);
             if (game.suddenDeath) {
                 const { players } = game;
                 let winners = players.filter(p => !p.dead && p.connected);
@@ -348,7 +360,7 @@ io.on('connection', socket => {
     socket.on('newTriviaQuestion', () => {
         if (game.triviaCategory) {
             game.prompt = getPrompt();
-            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory);
+            io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, null);
         }
     });
 
@@ -377,7 +389,9 @@ io.on('connection', socket => {
         game.prompt = null;
         game.suddenDeath = false;
         game.winner = null;
-        io.emit('updateGame', null, null, null, null, null, false, 0, null, null, null, null, null);
+        game.temperature = null;
+        game.city = null;
+        io.emit('updateGame', null, null, null, null, null, false, 0, null, null, null, null, null, null);
         io.emit('gameWon', null);
         io.to(game.host).emit('playWaitMusic');
         const { players } = game;
@@ -422,7 +436,7 @@ io.on('connection', socket => {
                 // What if it was their turn when they disconnected
                 if (game.active === socket.id) {
                     endBattle();
-                    io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null);
+                    io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null, null);
                 }
 
             }
@@ -546,18 +560,31 @@ const pickEvent = player => {
 };
 
 const getRandomChallenge = () => {
-    const randomChallange = _.sample(['category', 'rhyme', 'sentence', 'trivia']);
+    const randomChallange = _.sample(['category', 'rhyme', 'sentence', 'trivia', 'roker']);
     return (randomChallange === game.lastChallenge) ? getRandomChallenge() : randomChallange;
 };
 
 const getPrompt = () => {
+    if (game.challenge !== 'trivia')
+        game.triviaCategory = null;
+    
+    if (game.challenge !== 'roker')
+        game.city = null;
+
     switch(game.challenge) {
         case 'category':
-            game.triviaCategory = null;
             return game.categories.pop();
         case 'rhyme':
-            game.triviaCategory = null;
             return game.rhymes.pop();
+        case 'roker':
+            if (!game.cities.length) {
+                game.challenge = 'category';
+                return getPrompt();
+            }
+            game.city = game.cities.pop();
+            fetchWeather(game.city);
+
+            return game.city.name;
         case 'trivia':
             const questionObj = game.triviaQuestions.pop();
             if (!questionObj) {
@@ -582,14 +609,29 @@ const fetchTrivia = () => {
     }).catch(reason => console.log(reason));
 }
 
+const fetchWeather = city => {
+    if (!city || _.isNil(city.id))
+        return false;
+
+    fetch(`https://api.openweathermap.org/data/2.5/weather?id=${city.id}&units=imperial&APPID=${apiKey}`).then(response => response.json()).then(response => {
+        game.weather = response;
+        game.city.conditions = response.weather[0].description;
+        io.emit('updateCity', game.city);
+        console.log(game.city);
+    }).catch(reason => console.log(reason));
+}
+
 const resetGame = () => {
     game.host = null;
     game.players = [];
     game.started = false;
     game.active = null;
     game.prompt = null;
+    game.city = null;
+    game.temperature = null;
     game.rhymes = _.shuffle(require('./src/rhymes'));
     game.categories = _.shuffle(require('./src/categories'));
+    game.cities = _.shuffle(require('./src/cities'));
     game.suddenDeath = false;
 };
 
