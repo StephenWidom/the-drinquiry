@@ -143,6 +143,7 @@ io.on('connection', socket => {
         game.started = true;
         game.players[0].active = true;
 
+        io.to(game.host).emit('playStartSound');
         io.emit('updatePlayers', game.players);
         io.emit('updateActivePlayer', game.active);
         io.emit('gameStarted', true);
@@ -199,11 +200,13 @@ io.on('connection', socket => {
     socket.on('drawEvent', player => {
         game.event = pickEvent(player);
         io.emit('updateEvent', game.event);
+        io.to(game.host).emit('playDrawSound');
     });
 
     socket.on('drawMonster', id => {
         game.monster = getMonster();
         io.emit('updateMonster', game.monster);
+        io.to(game.host).emit('playDrawSound');
     });
 
     socket.on('initMonster', monster => {
