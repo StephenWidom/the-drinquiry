@@ -5,10 +5,11 @@ import Monster from './Monster';
 import Event from './Event';
 import Trivia from './Trivia';
 import CardContainer from './CardContainer';
+import Roker from './Roker';
 import { getActivePlayer } from '../utils';
 
 const Game = props => {
-    const { players, active, triviaCategory } = props;
+    const { players, active, triviaCategory, city } = props;
     const activePlayer = getActivePlayer(active, players);
 
     return <div className='Game'>
@@ -17,7 +18,9 @@ const Game = props => {
         <CardContainer>
             {triviaCategory
                 ? <Trivia {...props} player={activePlayer} />
-                : <Event {...props} player={activePlayer} host={true} />
+                : city
+                    ? <Roker {...props} player={activePlayer} host={true} />
+                    : <Event {...props} player={activePlayer} host={true} />
             }
             <Monster {...props} player={activePlayer} host={true} />
         </CardContainer>

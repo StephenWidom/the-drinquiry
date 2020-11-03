@@ -19,6 +19,7 @@ class App extends PureComponent {
             players: [],
             active: null,
             battleTurn: null,
+            city: null,
             started: false,
             event: null,
             monster: null,
@@ -57,15 +58,19 @@ class App extends PureComponent {
 
         this.socket.on('updateBattle', (battle, id) => this.setState({ battle, battleTurn: id }, () => console.log(this.state)));
 
-        this.socket.on('updateGame', (health, event, monster, active, battleTurn, battle, modifier, prompt, challenge, triviaAnswer, triviaCategory) => this.setState({ health, event, monster, active, battleTurn, battle, modifier, prompt, challenge, triviaAnswer, triviaCategory }, () => console.log(this.state)));
+        this.socket.on('updateGame', (health, event, monster, active, battleTurn, battle, modifier, prompt, challenge, triviaAnswer, triviaCategory, city, temperature = null) => this.setState({ health, event, monster, active, battleTurn, battle, modifier, prompt, challenge, triviaAnswer, triviaCategory, city, temperature }, () => console.log(this.state)));
 
-        this.socket.on('updatePrompt', (prompt, challenge, triviaCategory, triviaAnswer = null) => this.setState({ prompt, challenge, triviaCategory, triviaAnswer }, () => console.log(this.state)));
+        this.socket.on('updatePrompt', (prompt, challenge, triviaCategory, city = null, temperature = null) => this.setState({ prompt, challenge, triviaCategory, city, temperature }, () => console.log(this.state)));
+
+        this.socket.on('updateCity', city => this.setState({ city }, () => console.log(this.state)));
 
         this.socket.on('bootPlayer', () => {
             this.setState({ disconnected: true }, () => this.socket.disconnect(true));
         });
 
         this.socket.on('revealAnswer', triviaAnswer => this.setState({ triviaAnswer }));
+
+        this.socket.on('setTemp', temperature => this.setState({ temperature }));
 
         this.socket.on('gameWon', player => this.setState({ winner: player, started: false }));
     }

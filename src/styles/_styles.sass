@@ -226,6 +226,7 @@ h2
 .Event,
 .Monster,
 .Trivia,
+.Roker,
 .BlankCard
   transition: all 0.2s ease
   position: relative
@@ -307,7 +308,8 @@ h2
     height: 55px
 
 .Prompt,
-.Trivia
+.Trivia,
+.Roker
 
   .placeholder
     margin-bottom: 70px
@@ -322,12 +324,14 @@ h2
     left: 0
     right: 0
 
-.Trivia
+.Trivia,
+.Roker
   
   &>div:first-child
     height: 0
 
-  .question
+  .question,
+  .conditions
     font-size: 20px
     line-height: 1.4
     font-family: 'Roboto', sans-serif
@@ -337,6 +341,9 @@ h2
     background: #fff
     padding: 10px 5px
     border-radius: 4px
+
+    span
+      display: block
 
 .CardContainer
   display: flex
@@ -481,7 +488,8 @@ h2
   z-index: 1
 
 .Prompt,
-.Trivia
+.Trivia,
+.Roker
   
   z-index: 2
 
@@ -534,3 +542,4 @@ h2
   right: 20px
   color: #fff
   cursor: pointer
+
