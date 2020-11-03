@@ -20,7 +20,7 @@ import { isInGame, getPlayer, isActive, isBattling } from '../utils';
 export default class Play extends PureComponent {
 
     render() {
-        const { socket, players, winner, started, battle, active, prompt, monster, event, disconnected, city, health, triviaCategory, battleTurn } = this.props;
+        const { socket, players, winner, started, battle, active, prompt, monster, challenge, event, disconnected, city, health, triviaCategory, battleTurn } = this.props;
         const me = getPlayer(socket.id, players);
         return <div className='Play'>
             {!isInGame(socket.id, players) && <Redirect to='/join' />}
@@ -48,11 +48,11 @@ export default class Play extends PureComponent {
                                                 : <BlankCard />
                                             : <Event {...this.props} player={me} host={false} />
                                     }
-                                    {prompt && me.scroll && !battle && prompt === 'category' && !!health && <ScrollButton {...this.props} />}
+                                    {prompt && me.scroll && !battle && challenge === 'category' && !!health && <ScrollButton {...this.props} />}
                                     <Monster {...this.props} player={me} host={false} />
                                 </CardContainer>
                                 <MobileCardContainer>
-                                    {prompt && me.scroll && !battle && prompt === 'category' && !!health && <ScrollButton {...this.props} />}
+                                    {prompt && me.scroll && !battle && challenge === 'category' && !!health && <ScrollButton {...this.props} />}
                                     {!battle && event && !monster && !prompt && <Event {...this.props} player={me} host={false} />}
                                     {monster && !battle && <Monster {...this.props} player={me} host={false} />}
                                     {monster && battle && prompt && <Event {...this.props} player={me} host={false} />}
@@ -80,11 +80,11 @@ export default class Play extends PureComponent {
                                                     : <BlankCard />
                                                 : <Event {...this.props} player={me} host={false} />
                                         }
-                                        {prompt && me.scroll && !battle && prompt === 'category' && !!health && <ScrollButton {...this.props} />}
+                                        {prompt && me.scroll && !battle && challenge === 'category' && !!health && <ScrollButton {...this.props} />}
                                         <Monster {...this.props} player={me} host={false} />
                                     </CardContainer>
                                     <MobileCardContainer>
-                                        {prompt && me.scroll && !battle && prompt === 'category' && !!health && <ScrollButton {...this.props} />}
+                                        {prompt && me.scroll && !battle && challenge === 'category' && !!health && <ScrollButton {...this.props} />}
                                         {!battle && event && !monster && !prompt && <Event {...this.props} player={me} host={false} />}
                                         {monster && !battle && <Monster {...this.props} player={me} host={false} />}
                                         {monster && battle && prompt && <Event {...this.props} player={me} host={false} />}
