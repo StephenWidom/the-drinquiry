@@ -156,8 +156,12 @@ io.on('connection', socket => {
             thisPlayer.health = thisPlayer.health + modifier;
             if (thisPlayer.health > 5)
                 thisPlayer.health = 5;
-            if (!thisPlayer.health)
+            if (!thisPlayer.health) {
                 thisPlayer.dead = true;
+                thisPlayer.potions = 0;
+                thisPlayer.scroll = false;
+                thisPlayer.amulet = false;
+            }
 
             checkWinCondition();
             io.emit('updatePlayers', players);
@@ -296,9 +300,6 @@ io.on('connection', socket => {
 
     socket.on('missAttack', () => {
         const { players, battleTurn, health } = game;
-        endBattle();
-        io.to(game.host).emit('playMissSound');
-        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null, null);
         const thisPlayer = players.find(p => p.id === battleTurn);
         if (!_.isNil(thisPlayer)) {
             if (!thisPlayer.shield || health > 2) {
@@ -307,6 +308,9 @@ io.on('connection', socket => {
                 io.emit('updatePlayers', players);
             }
         }
+        endBattle();
+        io.to(game.host).emit('playMissSound');
+        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null, null);
     });
 
     // Player accidentally pressed hit but had an invalid attack

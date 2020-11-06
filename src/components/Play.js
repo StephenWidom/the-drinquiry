@@ -99,7 +99,9 @@ export default class Play extends PureComponent {
                                     </MobileCardContainer>
                                 </>
                                 : started
-                                    ? <h2>Awaiting the battle...</h2>
+                                    ? me.dead
+                                        ? <h2>Ya done, son. Or are you?</h2>
+                                        : <h2>Awaiting the battle...</h2>
                                     : <Instructions />
                         }
                     </>
