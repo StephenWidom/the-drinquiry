@@ -34,7 +34,7 @@ const Player = props => {
         <Potions player={player} socket={socket} />
         <Amulet player={player} socket={socket} />
         <Scroll player={player} socket={socket} />
-        {!slim && battle && isBattling(battleTurn, player) && <Timer {...props} socket={socket} host={slim} />}
+        {battle && isBattling(battleTurn, player) && <Timer {...props} socket={socket} host={slim} isActive={isActive(active, player)} />}
     </animated.div>;
 };
 

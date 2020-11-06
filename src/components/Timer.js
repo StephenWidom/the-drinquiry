@@ -16,11 +16,12 @@ export default class Timer extends PureComponent {
     }
 
     render() {
+        const { host, isActive } = this.props;
         return <div className='Timer'>
             <Top />
-            <Left />
+            <Left host={host} isActive={isActive} />
             <Bottom />
-            <Right />
+            <Right host={host} isActive={isActive} />
         </div>;
     }
 
@@ -40,10 +41,11 @@ const Top = React.memo(props => {
 });
 
 const Left = React.memo(props => {
+    const { host, isActive } = props;
     const leftStyles = useSpring({
         height: 0,
         from: {
-            height: 217
+            height: host && !isActive ? 95 : 217,
         },
         config: {
             duration: 8000,
@@ -68,10 +70,11 @@ const Bottom = React.memo(props => {
 });
 
 const Right = React.memo(props => {
+    const { host, isActive } = props;
     const rightStyles = useSpring({
         height: 0,
         from: {
-            height: 217,
+            height: host && !isActive ? 95 : 217,
         },
         config: {
             duration: 8000,
