@@ -313,6 +313,11 @@ io.on('connection', socket => {
         io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null, null);
     });
 
+    socket.on('endRound', () => {
+        endBattle();
+        io.emit('updateGame', game.health, game.event, game.monster, game.active, game.battleTurn, false, 0, null, null, null, null, null);
+    });
+
     // Player accidentally pressed hit but had an invalid attack
     socket.on('fuckedUp', id => {
         const { players, health } = game;
