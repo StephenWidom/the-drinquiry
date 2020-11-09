@@ -110,6 +110,10 @@ io.on('connection', socket => {
                 shield: false,
                 armor: false,
                 scroll: true,
+                haunted: {
+                    potions: false,
+                    timer: false,
+                },
             });
             io.emit('updatePlayers', players);
             io.to(game.host).emit('playDoorSound');
@@ -226,6 +230,12 @@ io.on('connection', socket => {
         game.prompt = getPrompt();
         if (game.challenge !== 'roker') // Already updating prompt in fetchWeather
             io.emit('updatePrompt', game.prompt, game.challenge, game.triviaCategory, game.city);
+    });
+
+    socket.on('buffMonster', buff => {
+        game.health += 3;
+        io.emit('updateMonsterHealth', game.health);
+        io.to(game.host).emit('playGhostSound');
     });
 
     socket.on('consumeScroll', () => {
@@ -368,10 +378,12 @@ io.on('connection', socket => {
         }, 3800);
     });
 
-    socket.on('shufflePlayers', () => {
+    socket.on('shufflePlayers', (haunt = false) => {
         const shuffledPlayers = _.shuffle(game.players);
         game.players = shuffledPlayers;
         io.emit('updatePlayers', game.players);
+        if (haunt)
+            io.to(game.host).emit('playGhostSound');
     });
 
     socket.on('newTriviaQuestion', () => {
@@ -400,7 +412,7 @@ io.on('connection', socket => {
 
     socket.on('runItBack', () => {
         // Soft reset
-        endBattle();
+        endBattle(false);
         game.started = false;
         game.active = null;
         game.prompt = null;
@@ -431,6 +443,17 @@ io.on('connection', socket => {
             }
         });
         io.emit('updatePlayers', players);
+    });
+
+    socket.on('hauntPlayer', (id, thing) => {
+        const { players } = game;
+        const thisPlayer = players.find(p => p.id === id);
+        if (!_.isNil(thisPlayer)) {
+            thisPlayer.haunted[thing] = true;
+            console.log(thisPlayer);
+        }
+        io.emit('updatePlayers', players);
+        io.to(game.host).emit('playGhostSound');
     });
 
     socket.on('disconnect', () => {
@@ -655,7 +678,8 @@ const resetGame = () => {
     game.suddenDeath = false;
 };
 
-const endBattle = () => {
+const endBattle = (updatePlayers = true) => {
+    const { players } = game;
     game.health = (game.monster && game.monster.src) === 'kratos_on_acid' ? game.health : null;
     game.event = null;
     game.monster = null;
@@ -668,6 +692,14 @@ const endBattle = () => {
     game.challenge = null;
     game.triviaCategory = null;
     game.triviaAnswer = null;
+
+    players.forEach(p => {
+        p.haunted.timer = false;
+        p.haunted.potions = false;
+    });
+
+    if (updatePlayers)
+        io.emit('updatePlayers', players);
 };
 
 const getNextCharacter = (i, name = null) => {

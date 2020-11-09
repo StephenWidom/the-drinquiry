@@ -17,6 +17,7 @@ export default class Audio extends PureComponent {
             chainsSound: false,
             dungeonDoor: false,
             drawSound: false,
+            ghostSound: false,
             potionSound: false,
             missSound: false,
             scrollSound: false,
@@ -41,6 +42,7 @@ export default class Audio extends PureComponent {
         socket.on('playPotionSound', () => this.setState({ potionSound: true }));
         socket.on('playMissSound', () => this.setState({ missSound: true }));
         socket.on('playScrollSound', () => this.setState({ scrollSound: true }));
+        socket.on('playGhostSound', () => this.setState({ ghostSound: true }));
         socket.on('playBattleMusic', () => this.setState({ battleStart: true, battleMusic: true, waitMusic: false }));
         socket.on('playMonsterDeathSound', () => this.setState({ monsterDeathSound: true }));
         socket.on('playDrawSound', () => this.setState({ drawSound: true }));
@@ -68,7 +70,7 @@ export default class Audio extends PureComponent {
     };
 
     render() {
-        const { volume, waitMusic, doorSound, drawSound, chainsSound, dungeonDoor, hitSound, hitSoundPlaying, potionSound, missSound, scrollSound, battleStart, battleMusic, monsterDeathSound, cheer, playerDeathSound, playerDeathSoundPlaying } = this.state;
+        const { volume, waitMusic, doorSound, drawSound, chainsSound, ghostSound, dungeonDoor, hitSound, hitSoundPlaying, potionSound, missSound, scrollSound, battleStart, battleMusic, monsterDeathSound, cheer, playerDeathSound, playerDeathSoundPlaying } = this.state;
         const { monster, battle } = this.props;
         return <div className='Audio'>
             <Icon
@@ -119,6 +121,12 @@ export default class Audio extends PureComponent {
                 volume={0.8}
                 playing={potionSound}
                 onEnd={() => this.setState({ potionSound: false })}
+            />
+            <ReactHowler
+                src={require('../assets/audio/ghost.mp3')}
+                volume={0.8}
+                playing={ghostSound}
+                onEnd={() => this.setState({ ghostSound: false })}
             />
             <ReactHowler
                 src={require('../assets/audio/miss.mp3')}

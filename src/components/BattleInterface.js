@@ -4,7 +4,7 @@ import LongPressable from 'react-longpressable';
 import { isBattling } from '../utils';
 
 const BattleInterface = props => {
-    const { player, socket, battleTurn } = props;
+    const { player, socket, battleTurn, haunted } = props;
     const hitMonster = () => {
         if (isBattling(battleTurn, player))
             socket.emit('hitMonster');
@@ -16,6 +16,9 @@ const BattleInterface = props => {
     }
 
     const skipAttack = () => {
+        if (haunted)
+            return;
+
         if (isBattling(battleTurn, player))
             socket.emit('skipAttack');
     }
@@ -29,7 +32,10 @@ const BattleInterface = props => {
             <img src={require('../assets/unseen_weapon_new.png')} alt='' />
         </div>
         {!!player.potions && <div className='skip' onClick={skipAttack}>
-            <img src={require('../assets/cyan_new.png')} alt='potion' />
+            {haunted
+                ? <img src={require('../assets/ghost.png')} alt='ghost' />
+                : <img src={require('../assets/cyan_new.png')} alt='potion' />
+            }
         </div>}
         <LongPressable
             onShortPress={missMonster}

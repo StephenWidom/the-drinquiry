@@ -6,6 +6,7 @@ import Potions from './Potions';
 import Amulet from './Amulet';
 import Scroll from './Scroll';
 import Timer from './Timer';
+import Ghost from './Ghost';
 
 import { isBattling, isActive } from '../utils';
 
@@ -30,11 +31,12 @@ const Player = props => {
         `}>
         <img className={`avatar ${started ? '' : 'allowchange'}`} src={require(`../assets/${player.character.class}.png`)} alt='' onClick={changeCharacter} />
         <h3>{player.name}</h3>
+        {(player.haunted.timer || player.haunted.potions) && <Ghost />}
         <Health player={player} socket={socket} />
         <Potions player={player} socket={socket} />
         <Amulet player={player} socket={socket} />
         <Scroll player={player} socket={socket} />
-        {battle && isBattling(battleTurn, player) && <Timer {...props} socket={socket} host={slim} isActive={isActive(active, player)} />}
+        {battle && isBattling(battleTurn, player) && <Timer {...props} haunted={player.haunted.timer} socket={socket} host={slim} isActive={isActive(active, player)} />}
     </animated.div>;
 };
 
