@@ -15,6 +15,7 @@ import ScrollButton from './ScrollButton';
 import BlankCard from './BlankCard';
 import Winner from './Winner';
 import Instructions from './Instructions';
+import Haunting from './Haunting';
 import { isInGame, getPlayer, isActive, isBattling } from '../utils';
 
 export default class Play extends PureComponent {
@@ -34,7 +35,7 @@ export default class Play extends PureComponent {
                         {me && isActive(active, me)
                             ? <>
                                 {battle && <>
-                                    <BattleInterface player={me} {...this.props} />
+                                    <BattleInterface player={me} {...this.props} haunted={me.haunted.potions} />
                                 </>}
                                 <DrawButtons player={me} socket={socket} {...this.props} />
                                 <CardContainer>
@@ -67,37 +68,39 @@ export default class Play extends PureComponent {
                                 </MobileCardContainer>
                             </>
                             : battle // Not active player, show cards, but don't run code
-                                ? <>
-                                    <BattleInterface player={me} {...this.props} />
-                                    <CardContainer>
-                                        {triviaCategory
-                                            ? isBattling(battleTurn, me) || battleTurn === null
-                                                ? <Trivia {...this.props} player={me} />
-                                                : <BlankCard />
-                                            : city
+                                ? me.dead
+                                    ? <Haunting{...this.props} player={me} />
+                                    : <>
+                                        <BattleInterface player={me} {...this.props} haunted={me.haunted.potions} />
+                                        <CardContainer>
+                                            {triviaCategory
                                                 ? isBattling(battleTurn, me) || battleTurn === null
-                                                    ? <Roker player={me} host={false} {...this.props} />
+                                                    ? <Trivia {...this.props} player={me} />
                                                     : <BlankCard />
-                                                : <Event {...this.props} player={me} host={false} />
-                                        }
-                                        {prompt && me.scroll && !battle && challenge === 'category' && !!health && <ScrollButton {...this.props} />}
-                                        <Monster {...this.props} player={me} host={false} />
-                                    </CardContainer>
-                                    <MobileCardContainer>
-                                        {prompt && me.scroll && !battle && challenge === 'category' && !!health && <ScrollButton {...this.props} />}
-                                        {!battle && event && !monster && !prompt && <Event {...this.props} player={me} host={false} />}
-                                        {monster && !battle && <Monster {...this.props} player={me} host={false} />}
-                                        {monster && battle && prompt && <Event {...this.props} player={me} host={false} />}
-                                        {triviaCategory && (isBattling(battleTurn, me)
-                                                ? <Trivia {...this.props} player={me} host={false} />
-                                                : battle && <BlankCard />)
-                                        }
-                                        {city && (isBattling(battleTurn, me)
-                                                ? <Roker {...this.props} host={false} player={me} />
-                                                : battle && <BlankCard />)
-                                        }
-                                    </MobileCardContainer>
-                                </>
+                                                : city
+                                                    ? isBattling(battleTurn, me) || battleTurn === null
+                                                        ? <Roker player={me} host={false} {...this.props} />
+                                                        : <BlankCard />
+                                                    : <Event {...this.props} player={me} host={false} />
+                                            }
+                                            {prompt && me.scroll && !battle && challenge === 'category' && !!health && <ScrollButton {...this.props} />}
+                                            <Monster {...this.props} player={me} host={false} />
+                                        </CardContainer>
+                                        <MobileCardContainer>
+                                            {prompt && me.scroll && !battle && challenge === 'category' && !!health && <ScrollButton {...this.props} />}
+                                            {!battle && event && !monster && !prompt && <Event {...this.props} player={me} host={false} />}
+                                            {monster && !battle && <Monster {...this.props} player={me} host={false} />}
+                                            {monster && battle && prompt && <Event {...this.props} player={me} host={false} />}
+                                            {triviaCategory && (isBattling(battleTurn, me)
+                                                    ? <Trivia {...this.props} player={me} host={false} />
+                                                    : battle && <BlankCard />)
+                                            }
+                                            {city && me && (isBattling(battleTurn, me)
+                                                    ? <Roker {...this.props} host={false} player={me} />
+                                                    : battle && <BlankCard />)
+                                            }
+                                        </MobileCardContainer>
+                                    </>
                                 : started
                                     ? me.dead
                                         ? <h2>Ya done, son. Or are you?</h2>

@@ -3,7 +3,6 @@ import { useSpring, animated } from 'react-spring';
 
 export default class Timer extends PureComponent {
     componentDidMount() {
-        console.log('TIMER MOUNTED');
         const { socket, host } = this.props;
         this.missTimer = setTimeout(() => {
             if (!host)
@@ -16,12 +15,14 @@ export default class Timer extends PureComponent {
     }
 
     render() {
-        const { host, isActive } = this.props;
+        const { host, isActive, haunted } = this.props;
         return <div className='Timer'>
-            <Top />
-            <Left host={host} isActive={isActive} />
-            <Bottom />
-            <Right host={host} isActive={isActive} />
+            {!haunted && <>
+                <Top />
+                <Left host={host} isActive={isActive} />
+                <Bottom />
+                <Right host={host} isActive={isActive} />
+            </>}
         </div>;
     }
 
