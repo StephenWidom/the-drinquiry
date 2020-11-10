@@ -110,6 +110,6 @@ const MonsterFront = props => {
         <h3>{monster.name}</h3>
         <img src={require(`../assets/${monster.src}.png`)} alt='' />
         <h5>{monster.challenge}</h5>
-        <h4>{health} / {monster.health}</h4>
+        <h4>{monster.hasOwnProperty('haunted') ? '??' : health} / {monster.health}</h4>
     </animated.div>;
 };
