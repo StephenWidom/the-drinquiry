@@ -238,6 +238,12 @@ io.on('connection', socket => {
         io.to(game.host).emit('playGhostSound');
     });
 
+    socket.on('hideMonsterHealth', () => {
+        game.monster.haunted = true;
+        io.emit('updateMonster', game.monster);
+        io.to(game.host).emit('playGhostSound');
+    });
+
     socket.on('consumeScroll', () => {
         io.emit('updatePrompt', null, game.challenge, null, null);
         io.to(game.host).emit('playScrollSound');

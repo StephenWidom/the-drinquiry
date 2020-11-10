@@ -28,6 +28,11 @@ const Haunting = props => {
         setDoneHaunting(true);
     }
 
+    const hideMonsterHealth = () => {
+        socket.emit('hideMonsterHealth');
+        setDoneHaunting(true);
+    }
+
     return <div className='Haunting'>
         {battle
             ? doneHaunting
@@ -36,7 +41,7 @@ const Haunting = props => {
                     ? <>
                         <h2>Fuck {hauntedPlayer.name}'s shit up!</h2>
                         <Button text='Timer' onClick={() => hauntTheir('timer')} large={true} fill={true} />
-                        <Button text='Potion' onClick={() => hauntTheir('potions')} large={true} fill={true} />
+                        <Button text='Potions' onClick={() => hauntTheir('potions')} large={true} fill={true} />
                     </>
                     : <>
                         <h2>Haunt a Player</h2>
@@ -44,6 +49,7 @@ const Haunting = props => {
                         <h2>Fuck with other shit</h2>
                         <Button onClick={shuffleOrder} large={true} fill={true} text='Shuffle Order' />
                         <Button onClick={buffMonster} large={true} fill={true} text='+3 Strengh to Monster' />
+                        <Button onClick={hideMonsterHealth} large={true} fill={true} text='Hide Monster Health' />
                     </>
             : <h2>Ya done, son. Or are you?</h2>
         }
